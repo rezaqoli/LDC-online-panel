@@ -1,3 +1,417 @@
 {
-  "devices": []
+  "devices": [
+    {
+      "id": "118232",
+      "name": "Board-8232",
+      "status": "offline",
+      "lastSeen": "2026-09-07T07:41:47.500Z",
+      "power": {
+        "battery": 0,
+        "solar": 11.16,
+        "low": true
+      },
+      "network": {
+        "signal": 0
+      },
+      "loopConfig": {},
+      "classification": {},
+      "profile": {
+        "name": "New Board",
+        "loopPairs": [
+          {
+            "enabled": true,
+            "distance_m": 2.2,
+            "sensor1": 0,
+            "ch1": 0,
+            "sensor2": 1,
+            "ch2": 0
+          },
+          {
+            "enabled": false,
+            "distance_m": 2.4,
+            "sensor1": 0,
+            "ch1": 1,
+            "sensor2": 1,
+            "ch2": 1
+          }
+        ],
+        "detector": {
+          "min_event_ms": 25,
+          "max_event_ms": 5000,
+          "enter_thresh": 1.5,
+          "exit_ratio": 0.7,
+          "auto_threshold": true,
+          "enter_sigma": 4,
+          "abs_sigma": 6
+        },
+        "classification": {
+          "motor_max_len": 1.2,
+          "car_max_len": 3.8,
+          "pickup_max_len": 5.2,
+          "van_max_len": 6.5,
+          "bus_max_len": 10.5,
+          "truck_s_max_len": 12,
+          "truck_2_max_len": 15,
+          "truck_3_max_len": 18,
+          "truck_4_plus_min_len": 20
+        },
+        "report": {
+          "enabled": true,
+          "interval_min": 1,
+          "clear_on_report": false
+        }
+      },
+      "stats": {},
+      "events": [],
+      "trafficReports": [],
+      "history": [
+        {
+          "ts": "2026-09-07T07:41:47.492Z",
+          "message": "MQTT_ID|118232",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:41:47.498Z",
+          "message": "MQTT_ID|118232",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:41:47.499Z",
+          "message": "POWER|bat:0.00|sol:11.16|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:41:47.500Z",
+          "message": "BATTERY_LOW|bat:0.00|min:9.00",
+          "type": "battery"
+        }
+      ],
+      "everConnected": true
+    },
+    {
+      "id": "15",
+      "name": "Board-15",
+      "status": "online",
+      "lastSeen": "2026-09-07T07:46:37.913Z",
+      "power": {
+        "battery": 0,
+        "solar": 11.1,
+        "low": true
+      },
+      "network": {
+        "signal": 0
+      },
+      "loopConfig": {},
+      "classification": {},
+      "profile": {
+        "name": "New Board",
+        "loopPairs": [
+          {
+            "enabled": true,
+            "distance_m": 2.2,
+            "sensor1": 0,
+            "ch1": 0,
+            "sensor2": 1,
+            "ch2": 0
+          },
+          {
+            "enabled": false,
+            "distance_m": 2.4,
+            "sensor1": 0,
+            "ch1": 1,
+            "sensor2": 1,
+            "ch2": 1
+          }
+        ],
+        "detector": {
+          "min_event_ms": 25,
+          "max_event_ms": 5000,
+          "enter_thresh": 1.5,
+          "exit_ratio": 0.7,
+          "auto_threshold": true,
+          "enter_sigma": 4,
+          "abs_sigma": 6
+        },
+        "classification": {
+          "motor_max_len": 1.2,
+          "car_max_len": 3.8,
+          "pickup_max_len": 5.2,
+          "van_max_len": 6.5,
+          "bus_max_len": 10.5,
+          "truck_s_max_len": 12,
+          "truck_2_max_len": 15,
+          "truck_3_max_len": 18,
+          "truck_4_plus_min_len": 20
+        },
+        "report": {
+          "enabled": true,
+          "interval_min": 1,
+          "clear_on_report": false
+        }
+      },
+      "stats": {},
+      "events": [],
+      "trafficReports": [],
+      "history": [
+        {
+          "ts": "2026-09-07T07:42:23.938Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:42:23.939Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:42:49.141Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:42:49.232Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:42:50.662Z",
+          "message": "CMD|1|GET_STATUS",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:42:51.373Z",
+          "message": "RSP|1|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:42:51.699Z",
+          "message": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "status"
+        },
+        {
+          "ts": "2026-09-07T07:42:51.898Z",
+          "message": "RSP|1|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:42:51.995Z",
+          "message": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "status"
+        },
+        {
+          "ts": "2026-09-07T07:43:18.319Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:43:18.464Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:43:37.461Z",
+          "message": "CMD|2|GET_POWER",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:43:37.628Z",
+          "message": "POWER|bat:0.00|sol:11.02|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:43:38.136Z",
+          "message": "RSP|2|POWER|bat:0.00|sol:11.02|low:1|valid:1|age_s:0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:43:38.469Z",
+          "message": "POWER|bat:0.00|sol:11.02|low:1|valid:1|age_s:0",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:43:38.665Z",
+          "message": "RSP|2|POWER|bat:0.00|sol:11.02|low:1|valid:1|age_s:0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:43:38.776Z",
+          "message": "POWER|bat:0.00|sol:11.02|low:1|valid:1|age_s:0",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:43:54.045Z",
+          "message": "CMD|3|CALIBRATE",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:43:54.794Z",
+          "message": "RSP|3|CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:43:55.118Z",
+          "message": "CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:43:55.298Z",
+          "message": "RSP|3|CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:43:55.406Z",
+          "message": "CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:44:37.074Z",
+          "message": "CMD|4|CALIBRATE",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:44:37.749Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:44:38.470Z",
+          "message": "RSP|4|CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:44:38.800Z",
+          "message": "CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:44:39.017Z",
+          "message": "RSP|4|CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:44:39.018Z",
+          "message": "CALIBRATION_STARTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:45:08.176Z",
+          "message": "CMD|5|GET_TIME",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:45:09.264Z",
+          "message": "RSP|5|TIME|synced:1|epoch:1788767108|iso:2026-09-07T11:15:08+0330|last_sync:1788766998|uptime_ms:157332",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:45:09.517Z",
+          "message": "TIME|synced:1|epoch:1788767108|iso:2026-09-07T11:15:08+0330|last_sync:1788766998|uptime_ms:157332",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:45:09.818Z",
+          "message": "RSP|5|TIME|synced:1|epoch:1788767108|iso:2026-09-07T11:15:08+0330|last_sync:1788766998|uptime_ms:157552",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:45:09.910Z",
+          "message": "TIME|synced:1|epoch:1788767108|iso:2026-09-07T11:15:08+0330|last_sync:1788766998|uptime_ms:157552",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T07:45:37.768Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:46:37.913Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        }
+      ],
+      "everConnected": true,
+      "commandLog": [
+        {
+          "cmdId": "1",
+          "boardId": "15",
+          "command": "GET_STATUS",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T07:42:50.658Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T07:42:50.662Z",
+          "replyBody": "CMD|1|GET_STATUS"
+        },
+        {
+          "cmdId": "2",
+          "boardId": "15",
+          "command": "GET_POWER",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T07:43:37.460Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T07:43:37.461Z",
+          "replyBody": "CMD|2|GET_POWER"
+        },
+        {
+          "cmdId": "3",
+          "boardId": "15",
+          "command": "CALIBRATE",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T07:43:54.043Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T07:43:54.045Z",
+          "replyBody": "CMD|3|CALIBRATE"
+        },
+        {
+          "cmdId": "4",
+          "boardId": "15",
+          "command": "CALIBRATE",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T07:44:37.071Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T07:44:37.074Z",
+          "replyBody": "CMD|4|CALIBRATE"
+        },
+        {
+          "cmdId": "5",
+          "boardId": "15",
+          "command": "GET_TIME",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T07:45:08.174Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T07:45:08.176Z",
+          "replyBody": "CMD|5|GET_TIME"
+        }
+      ],
+      "lastReply": "CMD|5|GET_TIME",
+      "statusInfo": {
+        "deviceId": "15",
+        "raw": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+        "ts": "2026-09-07T07:42:51.995Z",
+        "type": "status",
+        "S1C0": "0",
+        "S1C1": "0",
+        "S1C2": "0",
+        "S1C3": "0",
+        "S2C0": "0",
+        "S2C1": "0",
+        "S2C2": "0",
+        "S2C3": "0"
+      }
+    }
+  ]
 }

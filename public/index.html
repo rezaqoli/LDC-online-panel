@@ -91,6 +91,7 @@
             <div>
               <div class="meta"><span>Status</span><strong id="statusValue">—</strong></div>
               <div class="meta"><span>Name</span><strong id="nameValue">—</strong></div>
+              <div class="meta"><span>Board ID</span><strong id="boardIdValue">—</strong></div>
               <div class="meta"><span>Loop Pairs</span><strong id="loopPairsValue">—</strong></div>
               <div class="meta"><span>Vehicle Class</span><strong id="classValue">—</strong></div>
             </div>
@@ -112,12 +113,26 @@
               <option value="GET_SPEED_STATE">GET_SPEED_STATE</option>
               <option value="GET_LOOP_GEOMETRY">GET_LOOP_GEOMETRY</option>
               <option value="GET_CPU">GET_CPU</option>
+              <option value="GET_MQTT_ID">GET_MQTT_ID</option>
+              <option value="GET_MQTT_CFG">GET_MQTT_CFG</option>
+              <option value="GET_POWER">GET_POWER</option>
+              <option value="GET_TIME">GET_TIME</option>
               <option value="CALIBRATE">CALIBRATE</option>
               <option value="RESET_STATS">RESET_STATS</option>
             </select>
             <button onclick="sendSelectedCommand()">Send Command</button>
           </div>
           <div class="log" id="commandLog"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Command / Reply Log</h2>
+          <table>
+            <thead>
+              <tr><th>Time</th><th>Cmd</th><th>Command</th><th>Status</th><th>Reply</th></tr>
+            </thead>
+            <tbody id="commandReplyTable"></tbody>
+          </table>
         </div>
 
         <div class="panel">
@@ -216,10 +231,14 @@
         state.devices.forEach((d) => {
           const item = document.createElement('div');
           item.className = 'device-item' + (state.selectedId === d.id ? ' active' : '');
+          const lastReply = d.lastReply ? d.lastReply.replace(/^RSP\|[^|]+\|/, '').slice(0, 60) : '—';
+          const pending = (d.commandLog || []).filter((c) => c.status === 'pending').length;
           item.innerHTML = `
             <div class="row"><strong>${d.name || d.id}</strong><span class="pill ${d.status === 'online' ? '' : 'offline'}">${d.status || 'offline'}</span></div>
             <div class="small">ID: ${d.id}</div>
             <div class="small">Battery: ${d.battery ?? '—'} V</div>
+            <div class="small">Last reply: ${lastReply}</div>
+            <div class="small">Pending: ${pending}</div>
           `;
           item.onclick = () => {
             state.selectedId = d.id;
@@ -240,6 +259,7 @@
         const lastSeen = document.getElementById('lastSeenValue');
         const status = document.getElementById('statusValue');
         const name = document.getElementById('nameValue');
+        const boardId = document.getElementById('boardIdValue');
         const loopPairs = document.getElementById('loopPairsValue');
         const classField = document.getElementById('classValue');
         const input = document.getElementById('deviceNameInput');
@@ -247,8 +267,9 @@
         if (!d) {
           title.textContent = 'Board Overview';
           battery.textContent = '—'; solar.textContent = '—'; signal.textContent = '—'; lastSeen.textContent = '—';
-          status.textContent = '—'; name.textContent = '—'; loopPairs.textContent = '—'; classField.textContent = '—';
+          status.textContent = '—'; name.textContent = '—'; boardId.textContent = '—'; loopPairs.textContent = '—'; classField.textContent = '—';
           input.value = '';
+          renderCommandReplyTable([]);
           return;
         }
 
@@ -259,9 +280,22 @@
         lastSeen.textContent = d.lastSeen ? new Date(d.lastSeen).toLocaleString() : '—';
         status.textContent = d.status || 'offline';
         name.textContent = d.name || d.id;
+        boardId.textContent = d.id || '—';
         input.value = d.name || d.id;
         loopPairs.textContent = d.loopConfig ? JSON.stringify(d.loopConfig) : '—';
         classField.textContent = d.classification ? JSON.stringify(d.classification) : '—';
+        renderCommandReplyTable(d.commandLog || []);
+      }
+
+      function renderCommandReplyTable(log) {
+        const rows = (log || []).slice().reverse().slice(0, 25).map((c) => {
+          const time = new Date(c.ts).toLocaleTimeString();
+          const reply = c.replyBody ? c.replyBody.replace(/^RSP\|[^|]+\|/, '').slice(0, 120) : '—';
+          const statusColor = c.status === 'replied' ? 'var(--success)' : c.status === 'timeout' ? 'var(--danger)' : 'var(--warning)';
+          return `<tr><td>${time}</td><td>${c.cmdId || '—'}</td><td>${c.command || ''}</td><td style="color:${statusColor}">${c.status || 'pending'}</td><td>${reply}</td></tr>`;
+        }).join('');
+        const tbody = document.getElementById('commandReplyTable');
+        tbody.innerHTML = rows || '<tr><td colspan="5">No commands sent yet</td></tr>';
       }
 
       function renderEvents(events) {

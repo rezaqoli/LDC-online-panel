@@ -20,6 +20,8 @@ const state = {
   devices: [],
   clients: new Map(),
   messages: [],
+  pendingCommands: new Map(), // cmd_id -> { boardId, command, ts }
+  cmdCounter: 0,
   stats: {
     totalBoards: 0,
     onlineBoards: 0,
@@ -131,6 +133,8 @@ function buildDeviceSummary(device) {
     classification: device.classification ?? profile.classification ?? null,
     profile,
     stats: device.stats ?? null,
+    lastReply: device.lastReply ?? null,
+    commandLog: Array.isArray(device.commandLog) ? device.commandLog.slice(-20) : [],
     trafficReports: Array.isArray(device.trafficReports) ? device.trafficReports : []
   };
 }
@@ -152,6 +156,26 @@ function parsePipeKv(line) {
     obj[key] = value;
   }
   return obj;
+}
+
+// Strip the optional CMD|cmd_id| / RSP|cmd_id| envelope and return both the
+// inner payload and the cmd_id (if present). The envelope is purely additive;
+// commands without it are still treated as legacy/unaddressed messages.
+function unwrapCommandEnvelope(raw) {
+  if (!raw) return { cmdId: null, body: '' };
+  if (raw.startsWith('CMD|')) {
+    const rest = raw.substring(4);
+    const sep = rest.indexOf('|');
+    if (sep < 0) return { cmdId: rest.trim(), body: '' };
+    return { cmdId: rest.substring(0, sep).trim(), body: rest.substring(sep + 1) };
+  }
+  if (raw.startsWith('RSP|')) {
+    const rest = raw.substring(4);
+    const sep = rest.indexOf('|');
+    if (sep < 0) return { cmdId: rest.trim(), body: '' };
+    return { cmdId: rest.substring(0, sep).trim(), body: rest.substring(sep + 1) };
+  }
+  return { cmdId: null, body: raw };
 }
 
 function parseTrafficReport(line, deviceId) {
@@ -241,7 +265,14 @@ function parseEventMessage(deviceId, message) {
 function resolveBoardId(client, topic, message) {
   const candidate = [];
 
-  if (client && client.id) candidate.push(String(client.id));
+  // 1) Preferred: <id> segment from vehicles/<id>/... topic
+  const topicSegments = String(topic || '').split('/').filter(Boolean);
+  if (topicSegments.length >= 3 && topicSegments[0] === 'vehicles') {
+    const seg = topicSegments[1];
+    if (seg && !['+', '#'].includes(seg)) candidate.push(seg);
+  }
+
+  if (client && client.id && !isInternalClientId(client.id)) candidate.push(String(client.id));
 
   const mqttIdMatch = message.match(/(?:^|[|])MQTT_ID\|([^|]+)/i);
   if (mqttIdMatch && mqttIdMatch[1]) candidate.push(String(mqttIdMatch[1]).trim());
@@ -249,10 +280,9 @@ function resolveBoardId(client, topic, message) {
   const genericIdMatch = message.match(/(?:^|[|])(device_id|board_id|client_id|id)\:([^|]+)/i);
   if (genericIdMatch && genericIdMatch[2]) candidate.push(String(genericIdMatch[2]).trim());
 
-  const topicSegments = String(topic || '').split('/').filter(Boolean);
   if (topicSegments.length) {
     topicSegments.forEach((segment) => {
-      if (segment && !['vehicles', 'commands', 'command_responses', 'events', 'report', 'status', 'power'].includes(segment)) candidate.push(segment);
+      if (segment && !['vehicles', 'commands', 'command_responses', 'events', 'report', 'status', 'power', 'speed', '+', '#'].includes(segment)) candidate.push(segment);
     });
   }
 
@@ -297,6 +327,7 @@ function updateDeviceFromMessage(deviceId, message) {
   const evt = parseEventMessage(deviceId, message);
   device.lastSeen = new Date().toISOString();
   device.status = 'online';
+  device.everConnected = true;
 
   if (evt.type === 'identity' && evt.boardId) {
     device.id = evt.boardId;
@@ -342,6 +373,20 @@ function updateDeviceFromMessage(deviceId, message) {
     device.stats.totalSpeed = totalSpeed;
     device.stats.lastSpeedKmh = evt.speed_kmh;
     device.stats.avgSpeedKmh = totalSpeed / device.stats.speedSamples;
+  }
+
+  // Pair RSP|<cmd_id>|... responses with the originating CMD entry, if any.
+  const { cmdId } = unwrapCommandEnvelope(message);
+  if (cmdId && state.pendingCommands.has(cmdId)) {
+    const pending = state.pendingCommands.get(cmdId);
+    state.pendingCommands.delete(cmdId);
+    pending.replyTs = new Date().toISOString();
+    pending.replyBody = message;
+    pending.status = 'replied';
+    device.commandLog = Array.isArray(device.commandLog) ? device.commandLog : [];
+    device.commandLog.push(pending);
+    if (device.commandLog.length > 100) device.commandLog = device.commandLog.slice(-100);
+    device.lastReply = pending.replyBody;
   }
 
   device.history.push({ ts: new Date().toISOString(), message, type: evt.type });
@@ -446,36 +491,45 @@ broker.on('publish', (packet, client) => {
   const topic = packet.topic;
   const payload = packet.payload ? packet.payload.toString() : '';
   const clientId = client?.id || '';
-  const kind = topic === 'vehicles/commands' || topic.endsWith('/commands') ? 'out' : 'in';
+  const isCommandTopic = topic === 'vehicles/commands' || /\/commands$/.test(topic);
+  const kind = isCommandTopic ? 'out' : 'in';
   recordMessage(kind, topic, payload, clientId);
-  if (topic.includes('events') || topic.includes('report') || topic.includes('status') || topic.includes('power') || topic.includes('speed')) {
+  if (
+    /\/events$/.test(topic) ||
+    /\/command_responses$/.test(topic) ||
+    /\/speed$/.test(topic) ||
+    topic === 'vehicles/events' ||
+    topic === 'vehicles/command_responses' ||
+    topic.includes('report') ||
+    topic.includes('status') ||
+    topic.includes('power')
+  ) {
     const deviceId = resolveBoardId(client, topic, payload);
-    updateDeviceFromMessage(deviceId, normalizePayload(payload));
+    if (deviceId !== 'unknown') updateDeviceFromMessage(deviceId, normalizePayload(payload));
   }
 });
 
 // MQTT client to subscribe to board topics and relay into the dashboard state.
 const edgeClient = mqtt.connect('mqtt://localhost:' + mqttPort, { clientId: 'dashboard-bridge-' + uuidv4() });
 edgeClient.on('connect', () => {
-  edgeClient.subscribe('vehicles/events', (err) => {
-    if (!err) console.log('[dashboard] subscribed to vehicles/events');
-  });
-  edgeClient.subscribe('vehicles/command_responses', (err) => {
-    if (!err) console.log('[dashboard] subscribed to vehicles/command_responses');
-  });
-  edgeClient.subscribe('vehicles/commands', (err) => {
-    if (!err) console.log('[dashboard] subscribed to vehicles/commands');
-  });
+  const subs = [
+    'vehicles/+/events',
+    'vehicles/+/command_responses',
+    'vehicles/+/commands',
+    'vehicles/+/speed',
+    'vehicles/events',
+    'vehicles/command_responses',
+    'vehicles/commands'
+  ];
+  subs.forEach((t) => edgeClient.subscribe(t));
+  console.log('[dashboard] subscribed to per-board and legacy topics');
 });
 edgeClient.on('message', (topic, payload) => {
   const rawPayload = payload.toString();
-  recordMessage('in', topic, rawPayload, 'dashboard-bridge');
-  // If the message contains an MQTT_ID|, use that; otherwise fall back to a
-  // topic-derived device id. We don't want the bridge itself to register as
-  // a board when the payload doesn't carry an explicit identity.
+  recordMessage(/\/commands$/.test(topic) || topic === 'vehicles/commands' ? 'out' : 'in', topic, rawPayload, 'dashboard-bridge');
+  // Prefer the <id> segment from the topic; otherwise try payload heuristics.
   const resolved = resolveBoardId(null, topic, rawPayload);
-  const deviceId = resolved === 'unknown' ? null : resolved;
-  if (deviceId) updateDeviceFromMessage(deviceId, normalizePayload(rawPayload));
+  if (resolved !== 'unknown') updateDeviceFromMessage(resolved, normalizePayload(rawPayload));
 });
 
 app.use(express.json());
@@ -487,6 +541,10 @@ app.get('/api/devices', (req, res) => {
 
 app.get('/api/messages', (req, res) => {
   res.json({ messages: state.messages });
+});
+
+app.get('/api/pending-commands', (req, res) => {
+  res.json({ pending: Array.from(state.pendingCommands.values()) });
 });
 
 app.get('/api/device/:id', (req, res) => {
@@ -532,11 +590,21 @@ app.post('/api/device/:id/command', (req, res) => {
   if (!d) return res.status(404).json({ error: 'not_found' });
   const cmd = String(req.body?.command || '');
   if (!cmd) return res.status(400).json({ error: 'empty_command' });
-  const topic = 'vehicles/commands';
+  const cmdId = String(++state.cmdCounter);
+  const envelope = `CMD|${cmdId}|${cmd}`;
+  const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`, 'vehicles/commands'];
   const client = getCommandClient();
-  client.publish(topic, cmd, { qos: 0 }, (err) => {
-    res.json({ ok: !err, topic, command: cmd, error: err ? err.message : null });
+  let pending = false;
+  topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
+  state.pendingCommands.set(cmdId, {
+    cmdId,
+    boardId: d.id,
+    command: cmd,
+    topics,
+    ts: new Date().toISOString(),
+    status: 'pending'
   });
+  res.json({ ok: true, cmdId, topics, command: cmd });
 });
 
 app.get('/api/analytics', (req, res) => {
@@ -577,9 +645,11 @@ trackClientLifecycle();
 // considered offline even if its broker connection was missed (e.g. broker
 // restart, abrupt network drop). This guarantees the UI reflects reality.
 const OFFLINE_AFTER_MS = 60_000;
+const PENDING_TIMEOUT_MS = 30_000;
 setInterval(() => {
   const now = Date.now();
   let changed = false;
+
   state.devices.forEach((d) => {
     if (d.status !== 'online') return;
     const last = d.lastSeen ? new Date(d.lastSeen).getTime() : 0;
@@ -588,6 +658,24 @@ setInterval(() => {
       changed = true;
     }
   });
+
+  // Time out unanswered commands so the UI doesn't keep them as "pending".
+  state.pendingCommands.forEach((entry, id) => {
+    if (entry.status !== 'pending') return;
+    if (now - new Date(entry.ts).getTime() > PENDING_TIMEOUT_MS) {
+      entry.status = 'timeout';
+      entry.replyTs = new Date().toISOString();
+      const device = findDevice(entry.boardId);
+      if (device) {
+        device.commandLog = Array.isArray(device.commandLog) ? device.commandLog : [];
+        device.commandLog.push(entry);
+        if (device.commandLog.length > 100) device.commandLog = device.commandLog.slice(-100);
+      }
+      state.pendingCommands.delete(id);
+      changed = true;
+    }
+  });
+
   if (changed) {
     saveDevices();
     broadcastState();
