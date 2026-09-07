@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LDC Fleet Dashboard</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121b2d;
+        --panel-2: #182540;
+        --text: #ebf3ff;
+        --muted: #9bb0d1;
+        --primary: #45b7ff;
+        --success: #23d18b;
+        --warning: #f5b841;
+        --danger: #ef5d56;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif;
+      }
+      .topbar {
+        display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; background: var(--panel);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .topbar h1 { margin: 0; font-size: 1.4rem; }
+      .stats { display: grid; grid-template-columns: repeat(5, minmax(110px,1fr)); gap: 14px; padding: 16px 22px; }
+      .card {
+        background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px; padding: 16px;
+      }
+      .card h3 { margin: 0 0 8px; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+      .big { font-size: 1.8rem; font-weight: bold; }
+      .layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; padding: 0 22px 22px; }
+      .sidebar, .main { display: flex; flex-direction: column; gap: 16px; }
+      .device-list { display: flex; flex-direction: column; gap: 10px; }
+      .device-item { background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; cursor: pointer; }
+      .device-item.active { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(69,183,255,0.4); }
+      .device-item .row { display: flex; justify-content: space-between; align-items: center; }
+      .pill { padding: 4px 8px; border-radius: 999px; font-size: 0.7rem; background: rgba(35,209,139,0.15); color: var(--success); }
+      .pill.offline { background: rgba(239,93,86,0.15); color: var(--danger); }
+      .panel { background: var(--panel); border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.08); }
+      .panel h2 { margin-top: 0; }
+      .grid2 { display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: 12px; }
+      .meta { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+      input, select, button {
+        border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0d162a; color: var(--text); padding: 8px 10px;
+      }
+      button { background: var(--primary); color: #06111b; font-weight: bold; cursor: pointer; }
+      .log { max-height: 260px; overflow: auto; white-space: pre-wrap; background: #091322; border-radius: 10px; padding: 10px; font-family: Consolas, monospace; font-size: 12px; }
+      .message-log { height: 320px; overflow: auto; background: #091322; border-radius: 10px; padding: 10px; font-family: Consolas, monospace; font-size: 12px; }
+      .message-line { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); white-space: pre-wrap; overflow-wrap: anywhere; }
+      .message-line.in { color: #8ff4a2; }
+      .message-line.out { color: #79c0ff; }
+      .message-line.err { color: #ff7b7b; }
+      .message-line.sys { color: #ffd966; }
+      .message-meta { color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+      .small { color: var(--muted); font-size: 0.8rem; }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <h1>Vehicle Detector Fleet Dashboard</h1>
+      <div class="small" id="statusText">Connecting…</div>
+    </div>
+
+    <div class="stats" id="statsGrid"></div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="panel">
+          <h2>Boards</h2>
+          <div id="deviceList" class="device-list"></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="panel">
+          <h2 id="selectedDeviceTitle">Board Overview</h2>
+          <div class="grid2">
+            <div>
+              <div class="meta"><span>Battery</span><strong id="batteryValue">—</strong></div>
+              <div class="meta"><span>Solar</span><strong id="solarValue">—</strong></div>
+              <div class="meta"><span>Signal</span><strong id="signalValue">—</strong></div>
+              <div class="meta"><span>Last Seen</span><strong id="lastSeenValue">—</strong></div>
+            </div>
+            <div>
+              <div class="meta"><span>Status</span><strong id="statusValue">—</strong></div>
+              <div class="meta"><span>Name</span><strong id="nameValue">—</strong></div>
+              <div class="meta"><span>Loop Pairs</span><strong id="loopPairsValue">—</strong></div>
+              <div class="meta"><span>Vehicle Class</span><strong id="classValue">—</strong></div>
+            </div>
+          </div>
+          <div class="controls" style="margin-top:14px;">
+            <input id="deviceNameInput" placeholder="Board friendly name" />
+            <button onclick="saveDeviceName()">Save Name</button>
+            <button onclick="refreshDevices()">Refresh</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Command Console</h2>
+          <div class="controls">
+            <select id="commandPreset">
+              <option value="GET_STATUS">GET_STATUS</option>
+              <option value="GET_CONFIG">GET_CONFIG</option>
+              <option value="GET_REPORT">GET_REPORT</option>
+              <option value="GET_SPEED_STATE">GET_SPEED_STATE</option>
+              <option value="GET_LOOP_GEOMETRY">GET_LOOP_GEOMETRY</option>
+              <option value="GET_CPU">GET_CPU</option>
+              <option value="CALIBRATE">CALIBRATE</option>
+              <option value="RESET_STATS">RESET_STATS</option>
+            </select>
+            <button onclick="sendSelectedCommand()">Send Command</button>
+          </div>
+          <div class="log" id="commandLog"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Live MQTT Message Log</h2>
+          <div class="controls" style="margin-bottom:10px;">
+            <select id="messageFilter" aria-label="Message direction filter">
+              <option value="all">All messages</option>
+              <option value="in">Received from boards</option>
+              <option value="out">Sent to boards</option>
+              <option value="err">Errors</option>
+              <option value="sys">System</option>
+            </select>
+            <input id="messageSearch" placeholder="Search topic or payload" />
+            <label class="small"><input id="messageAutoScroll" type="checkbox" checked /> Auto-scroll</label>
+            <button type="button" onclick="clearMessageLog()">Clear Log</button>
+          </div>
+          <div class="message-log" id="messageLog" role="log" aria-live="polite"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Recent Events</h2>
+          <table>
+            <thead>
+              <tr><th>Time</th><th>Type</th><th>Device</th><th>Details</th></tr>
+            </thead>
+            <tbody id="eventsTable"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const state = { devices: [], selectedId: null, ws: null, messages: [] };
+      const statsGrid = document.getElementById('statsGrid');
+      const deviceList = document.getElementById('deviceList');
+      const eventsTable = document.getElementById('eventsTable');
+      const commandLog = document.getElementById('commandLog');
+      const messageLog = document.getElementById('messageLog');
+
+      function setLog(text) {
+        commandLog.textContent = text + '\n' + commandLog.textContent;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[char]));
+      }
+
+      function renderMessageLog() {
+        const filter = document.getElementById('messageFilter').value;
+        const search = document.getElementById('messageSearch').value.trim().toLowerCase();
+        const lines = state.messages.filter((message) => {
+          if (filter !== 'all' && message.kind !== filter) return false;
+          if (!search) return true;
+          return `${message.topic} ${message.payload} ${message.clientId}`.toLowerCase().includes(search);
+        });
+        messageLog.innerHTML = lines.map((message) => {
+          const time = new Date(message.ts).toLocaleTimeString();
+          const label = message.kind === 'in' ? 'IN ' : message.kind === 'out' ? 'OUT' : message.kind.toUpperCase();
+          const source = message.clientId ? ` from ${message.clientId}` : '';
+          return `<div class="message-line ${escapeHtml(message.kind)}"><span class="message-meta">[${escapeHtml(time)}] [${label}] ${escapeHtml(message.topic)}${escapeHtml(source)}</span>\n${escapeHtml(message.payload)}</div>`;
+        }).join('') || '<div class="small">No matching messages</div>';
+        if (document.getElementById('messageAutoScroll').checked) messageLog.scrollTop = messageLog.scrollHeight;
+      }
+
+      function clearMessageLog() {
+        state.messages = [];
+        renderMessageLog();
+      }
+
+      function addMessage(message) {
+        state.messages.push(message);
+        if (state.messages.length > 500) state.messages = state.messages.slice(-500);
+        renderMessageLog();
+      }
+
+      function renderStats(stats) {
+        const cards = [
+          { label: 'Boards', value: stats.totalBoards ?? 0 },
+          { label: 'Online', value: stats.onlineBoards ?? 0 },
+          { label: 'Vehicles', value: stats.totalVehicles ?? 0 },
+          { label: 'Avg Speed', value: `${(stats.avgSpeed ?? 0).toFixed(1)} km/h` },
+          { label: 'Violations', value: stats.violations ?? 0 }
+        ];
+        statsGrid.innerHTML = cards.map((c) => `
+          <div class="card">
+            <h3>${c.label}</h3>
+            <div class="big">${c.value}</div>
+          </div>
+        `).join('');
+      }
+
+      function renderDevices() {
+        deviceList.innerHTML = '';
+        state.devices.forEach((d) => {
+          const item = document.createElement('div');
+          item.className = 'device-item' + (state.selectedId === d.id ? ' active' : '');
+          item.innerHTML = `
+            <div class="row"><strong>${d.name || d.id}</strong><span class="pill ${d.status === 'online' ? '' : 'offline'}">${d.status || 'offline'}</span></div>
+            <div class="small">ID: ${d.id}</div>
+            <div class="small">Battery: ${d.battery ?? '—'} V</div>
+          `;
+          item.onclick = () => {
+            state.selectedId = d.id;
+            renderDevices();
+            renderSelectedDevice();
+          };
+          deviceList.appendChild(item);
+        });
+        if (!state.selectedId && state.devices.length) state.selectedId = state.devices[0].id;
+      }
+
+      function renderSelectedDevice() {
+        const d = state.devices.find((x) => x.id === state.selectedId);
+        const title = document.getElementById('selectedDeviceTitle');
+        const battery = document.getElementById('batteryValue');
+        const solar = document.getElementById('solarValue');
+        const signal = document.getElementById('signalValue');
+        const lastSeen = document.getElementById('lastSeenValue');
+        const status = document.getElementById('statusValue');
+        const name = document.getElementById('nameValue');
+        const loopPairs = document.getElementById('loopPairsValue');
+        const classField = document.getElementById('classValue');
+        const input = document.getElementById('deviceNameInput');
+
+        if (!d) {
+          title.textContent = 'Board Overview';
+          battery.textContent = '—'; solar.textContent = '—'; signal.textContent = '—'; lastSeen.textContent = '—';
+          status.textContent = '—'; name.textContent = '—'; loopPairs.textContent = '—'; classField.textContent = '—';
+          input.value = '';
+          return;
+        }
+
+        title.textContent = `${d.name || d.id} Overview`;
+        battery.textContent = d.battery != null ? `${Number(d.battery).toFixed(2)} V` : '—';
+        solar.textContent = d.solar != null ? `${Number(d.solar).toFixed(2)} V` : '—';
+        signal.textContent = d.signal != null ? `${d.signal}` : '—';
+        lastSeen.textContent = d.lastSeen ? new Date(d.lastSeen).toLocaleString() : '—';
+        status.textContent = d.status || 'offline';
+        name.textContent = d.name || d.id;
+        input.value = d.name || d.id;
+        loopPairs.textContent = d.loopConfig ? JSON.stringify(d.loopConfig) : '—';
+        classField.textContent = d.classification ? JSON.stringify(d.classification) : '—';
+      }
+
+      function renderEvents(events) {
+        const rows = (events || []).slice().reverse().slice(0, 20).map((e) => {
+          const time = new Date(e.ts || Date.now()).toLocaleTimeString();
+          const type = e.type || 'raw';
+          const device = e.deviceId || '—';
+          let details;
+          if (type === 'speed') {
+            const speed = Number(e.speed_kmh ?? e.speed ?? 0).toFixed(1);
+            const len = Number(e.length_m ?? e.len ?? 0).toFixed(2);
+            const dist = Number(e.distance_m ?? e.dist ?? 0).toFixed(2);
+            const delay = Number(e.delay_ms ?? e.delay ?? 0).toFixed(1);
+            const loops = [e.loopA || e.a, e.loopB || e.b].filter(Boolean).join(' → ');
+            const mtype = e.measurementType || e.type_label || '';
+            details = `${speed} km/h · ${len} m · dist ${dist} m · delay ${delay} ms${loops ? ` · loops ${loops}` : ''}${mtype ? ` · ${mtype}` : ''}`;
+          } else if (type === 'event') {
+            details = `${e.class || e.vehicle_class || ''} score=${e.score ?? e.anomaly_score ?? '—'} peak=${e.peak ?? e.peak_dev ?? '—'} len=${e.len ?? e.estimated_length_m ?? '—'} m`;
+          } else {
+            details = JSON.stringify(e).slice(0, 140);
+          }
+          return `<tr><td>${time}</td><td>${type}</td><td>${device}</td><td>${details}</td></tr>`;
+        }).join('');
+        eventsTable.innerHTML = rows || '<tr><td colspan="4">No recent events</td></tr>';
+      }
+
+      function applyState(payload) {
+        if (!payload || !payload.devices) return;
+        state.devices = payload.devices;
+        if (Array.isArray(payload.messages)) state.messages = payload.messages;
+        renderStats(payload.stats || { totalBoards: 0, onlineBoards: 0, totalVehicles: 0, avgSpeed: 0, violations: 0 });
+        renderDevices();
+        renderSelectedDevice();
+        renderEvents(payload.stats?.events || []);
+        renderMessageLog();
+      }
+
+      function refreshDevices() {
+        fetch('/api/devices')
+          .then((r) => r.json())
+          .then((data) => {
+            state.devices = data.devices || [];
+            renderStats({
+              totalBoards: state.devices.length,
+              onlineBoards: state.devices.filter((d) => d.status === 'online').length,
+              totalVehicles: 0,
+              avgSpeed: 0,
+              violations: 0
+            });
+            renderDevices();
+            renderSelectedDevice();
+          });
+      }
+
+      function connectWS() {
+        const ws = new WebSocket(`ws://${location.host}/ws`);
+        state.ws = ws;
+        ws.onopen = () => {
+          document.getElementById('statusText').textContent = 'Connected';
+        };
+        ws.onmessage = (ev) => {
+          const payload = JSON.parse(ev.data);
+          if (payload.type === 'state') applyState(payload);
+          if (payload.type === 'message') addMessage(payload.message);
+        };
+        ws.onclose = () => {
+          document.getElementById('statusText').textContent = 'Reconnecting…';
+          setTimeout(connectWS, 2000);
+        };
+      }
+
+      function saveDeviceName() {
+        const deviceId = state.selectedId;
+        const name = document.getElementById('deviceNameInput').value.trim();
+        if (!deviceId || !name) return;
+        fetch(`/api/device/${encodeURIComponent(deviceId)}/name`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        }).then(() => refreshDevices());
+      }
+
+      function sendSelectedCommand() {
+        const selected = document.getElementById('commandPreset').value;
+        const deviceId = state.selectedId;
+        if (!deviceId) return;
+        fetch(`/api/device/${encodeURIComponent(deviceId)}/command`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: selected })
+        }).then((r) => r.json()).then((d) => {
+          setLog(JSON.stringify(d, null, 2));
+        });
+      }
+
+      refreshDevices();
+      connectWS();
+      document.getElementById('messageFilter').addEventListener('change', renderMessageLog);
+      document.getElementById('messageSearch').addEventListener('input', renderMessageLog);
+      renderMessageLog();
+    </script>
+  </body>
+</html>
