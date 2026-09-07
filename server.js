@@ -6,6 +6,13 @@ const WebSocket = require('ws');
 const aedes = require('aedes');
 const { v4: uuidv4 } = require('uuid');
 const mqtt = require('mqtt');
+const {
+  normalizePayload,
+  parsePipeKv,
+  unwrapCommandEnvelope,
+  parseTrafficReport,
+  parseEventMessage,
+} = require('./parsers.js');
 
 const app = express();
 const server = http.createServer(app);
@@ -139,71 +146,15 @@ function buildDeviceSummary(device) {
   };
 }
 
-function normalizePayload(raw) {
-  const msg = typeof raw === 'string' ? raw : String(raw ?? '');
-  return msg.trim();
-}
-
-function parsePipeKv(line) {
-  const obj = {};
-  if (!line) return obj;
-  const parts = line.split('|');
-  for (const part of parts) {
-    if (!part || !part.includes(':')) continue;
-    const idx = part.indexOf(':');
-    const key = part.slice(0, idx).trim();
-    const value = part.slice(idx + 1).trim();
-    obj[key] = value;
-  }
-  return obj;
-}
-
 // Strip the optional CMD|cmd_id| / RSP|cmd_id| envelope and return both the
 // inner payload and the cmd_id (if present). The envelope is purely additive;
 // commands without it are still treated as legacy/unaddressed messages.
-function unwrapCommandEnvelope(raw) {
-  if (!raw) return { cmdId: null, body: '' };
-  if (raw.startsWith('CMD|')) {
-    const rest = raw.substring(4);
-    const sep = rest.indexOf('|');
-    if (sep < 0) return { cmdId: rest.trim(), body: '' };
-    return { cmdId: rest.substring(0, sep).trim(), body: rest.substring(sep + 1) };
-  }
-  if (raw.startsWith('RSP|')) {
-    const rest = raw.substring(4);
-    const sep = rest.indexOf('|');
-    if (sep < 0) return { cmdId: rest.trim(), body: '' };
-    return { cmdId: rest.substring(0, sep).trim(), body: rest.substring(sep + 1) };
-  }
-  return { cmdId: null, body: raw };
-}
+//
+// (parsePipeKv, parseTrafficReport, parseEventMessage and friends are imported
+//  from ./parsers.js at the top of this file. The full parseEventMessage with
+//  POWER / BATTERY_* / TRAFFIC_REPORT / STATUS branches lives in this file.)
 
-function parseTrafficReport(line, deviceId) {
-  const obj = parsePipeKv(line);
-  const out = {
-    deviceId,
-    ts: obj.ts || new Date().toISOString(),
-    duration_s: Number(obj.dur_s || 0),
-    total: Number(obj.total || 0),
-    avg_speed: Number(obj.avg_speed || 0),
-    speed_viol: Number(obj.speed_viol || 0),
-    dist_viol: Number(obj.dist_viol || 0),
-    lane_viol: Number(obj.lane_viol || 0),
-    classes: {}
-  };
-  Object.keys(obj).forEach((key) => {
-    const m = key.match(/^([A-Za-z0-9_+]+)_(cnt|avg)$/);
-    if (m) {
-      const cls = m[1];
-      const field = m[2];
-      if (!out.classes[cls]) out.classes[cls] = {};
-      out.classes[cls][field] = Number(obj[key]);
-    }
-  });
-  return out;
-}
-
-function parseEventMessage(deviceId, message) {
+function parseEventMessageLocal(deviceId, message) {
   const evt = { deviceId, raw: message, ts: new Date().toISOString() };
   if (message.startsWith('MQTT_ID|')) {
     const value = message.substring('MQTT_ID|'.length).trim();
@@ -324,7 +275,7 @@ function setDeviceStatus(deviceId, status, meta = {}) {
 function updateDeviceFromMessage(deviceId, message) {
   let device = setDeviceStatus(deviceId, 'online');
 
-  const evt = parseEventMessage(deviceId, message);
+  const evt = parseEventMessageLocal(deviceId, message);
   device.lastSeen = new Date().toISOString();
   device.status = 'online';
   device.everConnected = true;
@@ -527,6 +478,7 @@ edgeClient.on('connect', () => {
 edgeClient.on('message', (topic, payload) => {
   const rawPayload = payload.toString();
   recordMessage(/\/commands$/.test(topic) || topic === 'vehicles/commands' ? 'out' : 'in', topic, rawPayload, 'dashboard-bridge');
+  if (rawPayload.startsWith('CMD|')) return;
   // Prefer the <id> segment from the topic; otherwise try payload heuristics.
   const resolved = resolveBoardId(null, topic, rawPayload);
   if (resolved !== 'unknown') updateDeviceFromMessage(resolved, normalizePayload(rawPayload));
@@ -589,10 +541,12 @@ app.post('/api/device/:id/command', (req, res) => {
   const d = findDevice(req.params.id);
   if (!d) return res.status(404).json({ error: 'not_found' });
   const cmd = String(req.body?.command || '');
+  const broadcast = req.body?.broadcast === true;
   if (!cmd) return res.status(400).json({ error: 'empty_command' });
   const cmdId = String(++state.cmdCounter);
   const envelope = `CMD|${cmdId}|${cmd}`;
-  const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`, 'vehicles/commands'];
+  const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`];
+  if (broadcast) topics.push('vehicles/commands');
   const client = getCommandClient();
   let pending = false;
   topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
@@ -600,6 +554,7 @@ app.post('/api/device/:id/command', (req, res) => {
     cmdId,
     boardId: d.id,
     command: cmd,
+    broadcast,
     topics,
     ts: new Date().toISOString(),
     status: 'pending'

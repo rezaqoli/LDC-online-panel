@@ -91,11 +91,11 @@
     {
       "id": "15",
       "name": "Board-15",
-      "status": "online",
-      "lastSeen": "2026-09-07T07:46:37.913Z",
+      "status": "offline",
+      "lastSeen": "2026-09-07T10:48:11.143Z",
       "power": {
         "battery": 0,
-        "solar": 11.1,
+        "solar": 11.08,
         "low": true
       },
       "network": {
@@ -149,9 +149,555 @@
           "clear_on_report": false
         }
       },
-      "stats": {},
+      "stats": {
+        "deviceId": "15",
+        "raw": "TRAFFIC_REPORT|dur_s:23|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+        "ts": "2026-09-07T10:06:46.235Z",
+        "type": "traffic-report",
+        "duration_s": 23,
+        "total": 0,
+        "avg_speed": 0,
+        "speed_viol": 0,
+        "dist_viol": 0,
+        "lane_viol": 0,
+        "classes": {
+          "Unknown": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Motor": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Car": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Pickup": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Van": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Bus": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "TruckS": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Truck2": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Truck3": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Truck4+": {
+            "cnt": 0,
+            "avg": 0
+          }
+        }
+      },
       "events": [],
-      "trafficReports": [],
+      "trafficReports": [
+        {
+          "ts": "2026-09-07T08:02:32+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T08:42:07+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:02:55.408Z",
+          "total": 1,
+          "avg_speed": 90,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 1,
+              "avg": 90
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:02:55.849Z",
+          "total": 1,
+          "avg_speed": 90,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 1,
+              "avg": 90
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:03:50.932Z",
+          "total": 2,
+          "avg_speed": 90,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 2,
+              "avg": 90
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:03:51.241Z",
+          "total": 2,
+          "avg_speed": 90,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 2,
+              "avg": 90
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:05:51.630Z",
+          "total": 2,
+          "avg_speed": 90,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 2,
+              "avg": 90
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:05:52.089Z",
+          "total": 2,
+          "avg_speed": 90,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 2,
+              "avg": 90
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:06:45.925Z",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-07T10:06:46.235Z",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        }
+      ],
       "history": [
         {
           "ts": "2026-09-07T07:42:23.938Z",
@@ -327,6 +873,801 @@
           "ts": "2026-09-07T07:46:37.913Z",
           "message": "POWER|bat:0.00|sol:11.10|low:1",
           "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:47:37.947Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:48:37.936Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:49:37.992Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:50:37.919Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:51:37.952Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:52:38.016Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:53:20.140Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:53:20.279Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T07:53:37.849Z",
+          "message": "POWER|bat:0.00|sol:11.03|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:54:37.981Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:55:37.892Z",
+          "message": "POWER|bat:0.00|sol:11.04|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:56:38.021Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:57:38.041Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:58:38.072Z",
+          "message": "POWER|bat:0.00|sol:11.11|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T07:59:38.077Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:00:38.090Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:01:38.127Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:02:32.923Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-07T08:02:32+0330|dur_s:1200|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T08:02:38.036Z",
+          "message": "POWER|bat:0.00|sol:11.05|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:03:18.175Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:03:18.313Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:03:38.056Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:04:38.097Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:05:38.102Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:06:38.112Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:07:38.251Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:08:38.280Z",
+          "message": "POWER|bat:0.00|sol:11.03|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:09:38.286Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:10:38.414Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:11:38.422Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:12:38.434Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:13:18.217Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:13:18.348Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:13:38.276Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:14:38.303Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:15:38.313Z",
+          "message": "POWER|bat:0.00|sol:11.06|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:16:38.337Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:17:38.355Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:18:38.525Z",
+          "message": "POWER|bat:0.00|sol:11.04|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:19:38.533Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:20:38.544Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:21:38.553Z",
+          "message": "POWER|bat:0.00|sol:11.06|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:22:02.889Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:22:02.992Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:22:03.092Z",
+          "message": "POWER|bat:0.00|sol:11.16|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:22:04.503Z",
+          "message": "BATTERY_LOW|bat:0.00|min:9.00",
+          "type": "battery"
+        },
+        {
+          "ts": "2026-09-07T08:22:17.065Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:22:17.173Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:22:17.287Z",
+          "message": "POWER|bat:0.00|sol:11.19|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:22:17.563Z",
+          "message": "BATTERY_LOW|bat:0.00|min:9.00",
+          "type": "battery"
+        },
+        {
+          "ts": "2026-09-07T08:22:54.127Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:22:54.257Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:23:13.354Z",
+          "message": "POWER|bat:0.00|sol:11.05|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:24:13.362Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:25:13.378Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:26:13.421Z",
+          "message": "POWER|bat:0.00|sol:11.05|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:27:13.521Z",
+          "message": "POWER|bat:0.00|sol:11.03|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:28:13.580Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:29:13.573Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:30:13.589Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:31:13.618Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:32:13.647Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:32:54.118Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:32:54.247Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:33:13.553Z",
+          "message": "POWER|bat:0.00|sol:11.05|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:34:13.700Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:35:13.609Z",
+          "message": "POWER|bat:0.00|sol:11.11|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:36:13.724Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:37:13.642Z",
+          "message": "POWER|bat:0.00|sol:11.05|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:38:13.768Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:39:13.803Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:40:13.810Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:41:13.837Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:42:08.649Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-07T08:42:07+0330|dur_s:1200|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T08:42:13.766Z",
+          "message": "POWER|bat:0.00|sol:11.11|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:42:53.995Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:42:54.135Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:43:13.772Z",
+          "message": "POWER|bat:0.00|sol:11.06|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:44:13.799Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:45:13.806Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:46:14.790Z",
+          "message": "POWER|bat:0.00|sol:11.03|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:46:26.000Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:46:26.146Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:46:26.230Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T08:46:26.513Z",
+          "message": "BATTERY_LOW|bat:0.00|min:9.00",
+          "type": "battery"
+        },
+        {
+          "ts": "2026-09-07T08:47:16.585Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T08:47:16.767Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T09:57:09.396Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T09:57:09.528Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T09:57:17.626Z",
+          "message": "POWER|bat:0.00|sol:11.04|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T09:57:50.548Z",
+          "message": "RSP|1|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:98953",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:57:50.849Z",
+          "message": "TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:98953",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:57:51.139Z",
+          "message": "RSP|2|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:99224",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:57:51.238Z",
+          "message": "TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:99224",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:57:53.370Z",
+          "message": "RSP|3|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:101778",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:57:53.760Z",
+          "message": "TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:101778",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:57:53.963Z",
+          "message": "RSP|3|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:102174",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:57:54.060Z",
+          "message": "TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:102174",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:58:44.492Z",
+          "message": "RSP|4|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:152909",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:58:44.801Z",
+          "message": "TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:152909",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:58:45.103Z",
+          "message": "RSP|4|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:153182",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:58:45.201Z",
+          "message": "TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:153182",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:59:15.064Z",
+          "message": "RSP|5|WIFI|Akhtarniroo|192.168.100.232|-72",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:59:15.294Z",
+          "message": "WIFI|Akhtarniroo|192.168.100.232|-72",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:59:15.484Z",
+          "message": "RSP|5|WIFI|Akhtarniroo|192.168.100.232|-73",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T09:59:15.579Z",
+          "message": "WIFI|Akhtarniroo|192.168.100.232|-73",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:00:17.511Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:02:55.110Z",
+          "message": "RSP|6|TRAFFIC_REPORT|dur_s:402|total:1|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:1|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:02:55.409Z",
+          "message": "TRAFFIC_REPORT|dur_s:402|total:1|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:1|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:02:55.741Z",
+          "message": "RSP|6|TRAFFIC_REPORT|dur_s:402|total:1|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:1|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:02:55.849Z",
+          "message": "TRAFFIC_REPORT|dur_s:402|total:1|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:1|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:03:50.572Z",
+          "message": "RSP|7|TRAFFIC_REPORT|dur_s:458|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:03:50.932Z",
+          "message": "TRAFFIC_REPORT|dur_s:458|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:03:51.141Z",
+          "message": "RSP|7|TRAFFIC_REPORT|dur_s:458|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:03:51.242Z",
+          "message": "TRAFFIC_REPORT|dur_s:458|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:04:57.189Z",
+          "message": "RSP|8|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:3572515|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:04:57.448Z",
+          "message": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:3572515|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "status"
+        },
+        {
+          "ts": "2026-09-07T10:04:57.747Z",
+          "message": "RSP|8|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:3572513|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:04:57.837Z",
+          "message": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:3572513|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "status"
+        },
+        {
+          "ts": "2026-09-07T10:05:18.175Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:05:51.350Z",
+          "message": "RSP|9|TRAFFIC_REPORT|dur_s:578|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:05:51.630Z",
+          "message": "TRAFFIC_REPORT|dur_s:578|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:05:51.980Z",
+          "message": "RSP|9|TRAFFIC_REPORT|dur_s:579|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:05:52.089Z",
+          "message": "TRAFFIC_REPORT|dur_s:579|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:06:31.326Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:06:31.466Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:06:31.566Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:06:31.826Z",
+          "message": "BATTERY_LOW|bat:0.00|min:9.00",
+          "type": "battery"
+        },
+        {
+          "ts": "2026-09-07T10:06:45.566Z",
+          "message": "RSP|12|TRAFFIC_REPORT|dur_s:22|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:06:45.925Z",
+          "message": "TRAFFIC_REPORT|dur_s:22|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:06:46.134Z",
+          "message": "RSP|12|TRAFFIC_REPORT|dur_s:23|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-07T10:06:46.235Z",
+          "message": "TRAFFIC_REPORT|dur_s:23|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-07T10:07:18.114Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:07:18.256Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:08:28.513Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:14:28.657Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:15:33.390Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:15:33.536Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:16:15.659Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:16:15.799Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:17:01.277Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:17:01.418Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:17:37.825Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:17:37.827Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:18:14.894Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:18:14.895Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:20:26.766Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:26:26.776Z",
+          "message": "POWER|bat:0.00|sol:11.09|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:28:12.811Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:28:12.936Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:32:26.717Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:36:25.979Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:38:12.498Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:38:12.501Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:41:27.496Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:43:26.983Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:47:27.845Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T10:48:11.142Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T10:48:11.143Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
         }
       ],
       "everConnected": true,
@@ -395,18 +1736,172 @@
           "status": "replied",
           "replyTs": "2026-09-07T07:45:08.176Z",
           "replyBody": "CMD|5|GET_TIME"
+        },
+        {
+          "cmdId": "1",
+          "boardId": "118232",
+          "command": "GET_TIME",
+          "topics": [
+            "vehicles/118232/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T09:57:34.453Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T09:57:50.548Z",
+          "replyBody": "RSP|1|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:98953"
+        },
+        {
+          "cmdId": "2",
+          "boardId": "118232",
+          "command": "GET_TIME",
+          "topics": [
+            "vehicles/118232/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T09:57:40.072Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T09:57:51.139Z",
+          "replyBody": "RSP|2|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:99224"
+        },
+        {
+          "cmdId": "3",
+          "boardId": "15",
+          "command": "GET_TIME",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T09:57:52.783Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T09:57:53.370Z",
+          "replyBody": "RSP|3|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:101778"
+        },
+        {
+          "cmdId": "4",
+          "boardId": "15",
+          "command": "GET_TIME",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T09:58:34.725Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T09:58:44.492Z",
+          "replyBody": "RSP|4|TIME|synced:0|epoch:0|iso:|last_sync:0|uptime_ms:152909"
+        },
+        {
+          "cmdId": "5",
+          "boardId": "15",
+          "command": "GET_WIFI",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T09:59:08.904Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T09:59:15.064Z",
+          "replyBody": "RSP|5|WIFI|Akhtarniroo|192.168.100.232|-72"
+        },
+        {
+          "cmdId": "6",
+          "boardId": "15",
+          "command": "GET_REPORT",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T10:02:48.609Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T10:02:55.110Z",
+          "replyBody": "RSP|6|TRAFFIC_REPORT|dur_s:402|total:1|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:1|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0"
+        },
+        {
+          "cmdId": "7",
+          "boardId": "15",
+          "command": "GET_REPORT",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T10:03:49.682Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T10:03:50.572Z",
+          "replyBody": "RSP|7|TRAFFIC_REPORT|dur_s:458|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0"
+        },
+        {
+          "cmdId": "8",
+          "boardId": "15",
+          "command": "GET_STATUS",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T10:04:52.911Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T10:04:57.189Z",
+          "replyBody": "RSP|8|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:3572515|S2C0:0|S2C1:0|S2C2:0|S2C3:0"
+        },
+        {
+          "cmdId": "9",
+          "boardId": "15",
+          "command": "GET_REPORT",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T10:05:43.904Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T10:05:51.350Z",
+          "replyBody": "RSP|9|TRAFFIC_REPORT|dur_s:578|total:2|avg_speed:90.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:2|Bus_avg:90.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0"
+        },
+        {
+          "cmdId": "12",
+          "boardId": "15",
+          "command": "GET_REPORT",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T10:06:41.320Z",
+          "status": "replied",
+          "replyTs": "2026-09-07T10:06:45.566Z",
+          "replyBody": "RSP|12|TRAFFIC_REPORT|dur_s:22|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0"
+        },
+        {
+          "cmdId": "10",
+          "boardId": "15",
+          "command": "RESET_STATS",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T10:06:14.753Z",
+          "status": "timeout",
+          "replyTs": "2026-09-07T10:06:53.530Z"
+        },
+        {
+          "cmdId": "11",
+          "boardId": "15",
+          "command": "GET_REPORT",
+          "topics": [
+            "vehicles/15/commands",
+            "vehicles/commands"
+          ],
+          "ts": "2026-09-07T10:06:27.007Z",
+          "status": "timeout",
+          "replyTs": "2026-09-07T10:07:03.540Z"
         }
       ],
-      "lastReply": "CMD|5|GET_TIME",
+      "lastReply": "RSP|12|TRAFFIC_REPORT|dur_s:22|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
       "statusInfo": {
         "deviceId": "15",
-        "raw": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
-        "ts": "2026-09-07T07:42:51.995Z",
+        "raw": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:3572513|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+        "ts": "2026-09-07T10:04:57.837Z",
         "type": "status",
         "S1C0": "0",
         "S1C1": "0",
         "S1C2": "0",
-        "S1C3": "0",
+        "S1C3": "3572513",
         "S2C0": "0",
         "S2C1": "0",
         "S2C2": "0",
