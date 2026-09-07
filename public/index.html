@@ -176,6 +176,8 @@
             <button onclick="uploadFirmware()">Upload and start OTA</button>
           </div>
           <div class="small" id="firmwareStatus">No firmware uploaded.</div>
+          <div class="small" id="otaLiveStatus">OTA topic status: waiting</div>
+          <progress id="otaProgress" value="0" max="100" style="width:100%;margin-top:8px;"></progress>
           <div class="log" id="firmwareLog"></div>
         </div>
 
@@ -379,12 +381,16 @@
         const loopPairs = document.getElementById('loopPairsValue');
         const classField = document.getElementById('classValue');
         const input = document.getElementById('deviceNameInput');
+        const otaStatus = document.getElementById('otaLiveStatus');
+        const otaProgress = document.getElementById('otaProgress');
 
         if (!d) {
           title.textContent = 'Board Overview';
           battery.textContent = '—'; solar.textContent = '—'; signal.textContent = '—'; lastSeen.textContent = '—';
           status.textContent = '—'; name.textContent = '—'; boardId.textContent = '—'; loopPairs.textContent = '—'; classField.textContent = '—';
           input.value = '';
+          otaStatus.textContent = 'OTA topic status: waiting';
+          otaProgress.value = 0;
           renderCommandReplyTable([]);
           loadConfigForm({});
           return;
@@ -401,6 +407,14 @@
         input.value = d.name || d.id;
         loopPairs.textContent = d.loopConfig ? JSON.stringify(d.loopConfig) : '—';
         classField.textContent = d.classification ? JSON.stringify(d.classification) : '—';
+        if (d.ota) {
+          const ota = d.ota;
+          const detail = ota.state === 'progress' && ota.received != null
+            ? ` ${ota.percent ?? 0}% (${ota.received}/${ota.total} bytes)`
+            : (ota.raw ? ` ${ota.raw}` : '');
+          otaStatus.textContent = `OTA topic status: ${ota.state || 'unknown'}${detail}`;
+          otaProgress.value = Number(ota.percent || (ota.state === 'success' ? 100 : 0));
+        }
         renderCommandReplyTable(d.commandLog || []);
         loadConfigForm(d.profile || {});
       }

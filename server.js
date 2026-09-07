@@ -143,6 +143,7 @@ function buildDeviceSummary(device) {
     signal: device.network?.signal ?? null,
     loopConfig: device.loopConfig ?? profile.loopPairs ?? null,
     classification: device.classification ?? profile.classification ?? null,
+    ota: device.ota ?? null,
     profile,
     stats: device.stats ?? null,
     lastReply: device.lastReply ?? null,
@@ -206,6 +207,22 @@ function parseEventMessageLocal(deviceId, message) {
   if (message.startsWith('TRAFFIC_REPORT')) {
     evt.type = 'traffic-report';
     Object.assign(evt, parseTrafficReport(message, deviceId));
+    return evt;
+  }
+  if (message.startsWith('OTA_STATUS|') || message.startsWith('OTA_SUCCESS|') || message.startsWith('OTA_ERROR|')) {
+    const separator = message.indexOf('|');
+    evt.type = 'ota';
+    evt.state = message.substring(0, separator).substring(4).replace(/^_/, '').toLowerCase();
+    evt.detail = separator >= 0 ? message.substring(separator + 1) : '';
+    return evt;
+  }
+  if (message.startsWith('OTA_PROGRESS|')) {
+    const parts = message.split('|');
+    evt.type = 'ota';
+    evt.state = 'progress';
+    evt.received = Number(parts[1] || 0);
+    evt.total = Number(parts[2] || 0);
+    evt.percent = evt.total > 0 ? Math.min(100, Math.round((evt.received / evt.total) * 100)) : 0;
     return evt;
   }
   if (message.startsWith('STATUS|') || message.startsWith('CONFIG|') || message.startsWith('NOISE')) {
@@ -296,6 +313,17 @@ function updateDeviceFromMessage(deviceId, message) {
 
   if (evt.type === 'status') {
     device.statusInfo = evt;
+  }
+
+  if (evt.type === 'ota') {
+    device.ota = {
+      state: evt.state,
+      received: evt.received ?? null,
+      total: evt.total ?? null,
+      percent: evt.percent ?? null,
+      ts: evt.ts,
+      raw: evt.raw
+    };
   }
 
   if (evt.type === 'traffic-report') {
@@ -480,15 +508,6 @@ edgeClient.on('connect', () => {
   subs.forEach((t) => edgeClient.subscribe(t));
   console.log('[dashboard] subscribed to per-board and legacy topics');
 });
-edgeClient.on('message', (topic, payload) => {
-  const rawPayload = payload.toString();
-  recordMessage(/\/commands$/.test(topic) || topic === 'vehicles/commands' ? 'out' : 'in', topic, rawPayload, 'dashboard-bridge');
-  if (rawPayload.startsWith('CMD|')) return;
-  // Prefer the <id> segment from the topic; otherwise try payload heuristics.
-  const resolved = resolveBoardId(null, topic, rawPayload);
-  if (resolved !== 'unknown') updateDeviceFromMessage(resolved, normalizePayload(rawPayload));
-});
-
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
