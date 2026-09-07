@@ -64,21 +64,22 @@ function parseTrafficReport(line, deviceId) {
 
 function parseEventMessage(deviceId, message) {
   const evt = { deviceId, raw: message, ts: new Date().toISOString() };
-  if (message.startsWith('MQTT_ID|')) {
-    const value = message.substring('MQTT_ID|'.length).trim();
+  const body = unwrapCommandEnvelope(message).body.trim();
+  if (body.startsWith('MQTT_ID|')) {
+    const value = body.substring('MQTT_ID|'.length).trim();
     evt.type = 'identity';
     evt.boardId = value;
     evt.clientId = value;
     return evt;
   }
-  if (message.startsWith('EVENT|')) {
-    const kv = parsePipeKv(message.substring('EVENT|'.length));
+  if (body.startsWith('EVENT|')) {
+    const kv = parsePipeKv(body.substring('EVENT|'.length));
     Object.assign(evt, kv);
     evt.type = 'event';
     return evt;
   }
-  if (message.startsWith('SPEED|')) {
-    const kv = parsePipeKv(message.substring('SPEED|'.length));
+  if (body.startsWith('SPEED|')) {
+    const kv = parsePipeKv(body.substring('SPEED|'.length));
     Object.assign(evt, kv);
     evt.type = 'speed';
     evt.loopIndex = Number(kv.idx || 0);

@@ -130,6 +130,11 @@ function findDevice(deviceId) {
   return state.devices.find((d) => d.id === deviceId);
 }
 
+function findDeviceByClientId(clientId) {
+  const id = String(clientId || '');
+  return state.devices.find((d) => d.id === id || (Array.isArray(d.clientIds) && d.clientIds.includes(id)));
+}
+
 function buildDeviceSummary(device) {
   const profile = device.profile || defaultProfile();
   return {
@@ -162,21 +167,24 @@ function buildDeviceSummary(device) {
 
 function parseEventMessageLocal(deviceId, message) {
   const evt = { deviceId, raw: message, ts: new Date().toISOString() };
-  if (message.startsWith('MQTT_ID|')) {
-    const value = message.substring('MQTT_ID|'.length).trim();
+  // Responses are commonly wrapped as RSP|<request-id>|<payload>. Parse the
+  // payload for its meaning while keeping the complete message in raw.
+  const body = unwrapCommandEnvelope(message).body.trim();
+  if (body.startsWith('MQTT_ID|')) {
+    const value = body.substring('MQTT_ID|'.length).trim();
     evt.type = 'identity';
     evt.boardId = value;
     evt.clientId = value;
     return evt;
   }
-  if (message.startsWith('EVENT|')) {
-    const kv = parsePipeKv(message.substring('EVENT|'.length));
+  if (body.startsWith('EVENT|')) {
+    const kv = parsePipeKv(body.substring('EVENT|'.length));
     Object.assign(evt, kv);
     evt.type = 'event';
     return evt;
   }
-  if (message.startsWith('SPEED|')) {
-    const kv = parsePipeKv(message.substring('SPEED|'.length));
+  if (body.startsWith('SPEED|')) {
+    const kv = parsePipeKv(body.substring('SPEED|'.length));
     Object.assign(evt, kv);
     evt.type = 'speed';
     evt.loopIndex = Number(kv.idx || 0);
@@ -189,8 +197,8 @@ function parseEventMessageLocal(deviceId, message) {
     evt.measurementType = kv.type || null;
     return evt;
   }
-  if (message.startsWith('POWER|')) {
-    const kv = parsePipeKv(message.substring('POWER|'.length));
+  if (body.startsWith('POWER|')) {
+    const kv = parsePipeKv(body.substring('POWER|'.length));
     evt.type = 'power';
     evt.power = {
       battery: Number(kv.bat || 0),
@@ -199,25 +207,25 @@ function parseEventMessageLocal(deviceId, message) {
     };
     return evt;
   }
-  if (message.startsWith('BATTERY_LOW|') || message.startsWith('BATTERY_OK|')) {
+  if (body.startsWith('BATTERY_LOW|') || body.startsWith('BATTERY_OK|')) {
     evt.type = 'battery';
-    evt.power = { battery: Number((parsePipeKv(message.substring(message.indexOf('|') + 1)).bat || 0)) };
+    evt.power = { battery: Number((parsePipeKv(body.substring(body.indexOf('|') + 1)).bat || 0)) };
     return evt;
   }
-  if (message.startsWith('TRAFFIC_REPORT')) {
+  if (body.startsWith('TRAFFIC_REPORT')) {
     evt.type = 'traffic-report';
-    Object.assign(evt, parseTrafficReport(message, deviceId));
+    Object.assign(evt, parseTrafficReport(body, deviceId));
     return evt;
   }
-  if (message.startsWith('OTA_STATUS|') || message.startsWith('OTA_SUCCESS|') || message.startsWith('OTA_ERROR|')) {
-    const separator = message.indexOf('|');
+  if (body.startsWith('OTA_STATUS|') || body.startsWith('OTA_SUCCESS|') || body.startsWith('OTA_ERROR|')) {
+    const separator = body.indexOf('|');
     evt.type = 'ota';
-    evt.state = message.substring(0, separator).substring(4).replace(/^_/, '').toLowerCase();
-    evt.detail = separator >= 0 ? message.substring(separator + 1) : '';
+    evt.state = body.substring(0, separator).substring(4).replace(/^_/, '').toLowerCase();
+    evt.detail = separator >= 0 ? body.substring(separator + 1) : '';
     return evt;
   }
-  if (message.startsWith('OTA_PROGRESS|')) {
-    const parts = message.split('|');
+  if (body.startsWith('OTA_PROGRESS|')) {
+    const parts = body.split('|');
     evt.type = 'ota';
     evt.state = 'progress';
     evt.received = Number(parts[1] || 0);
@@ -225,9 +233,9 @@ function parseEventMessageLocal(deviceId, message) {
     evt.percent = evt.total > 0 ? Math.min(100, Math.round((evt.received / evt.total) * 100)) : 0;
     return evt;
   }
-  if (message.startsWith('STATUS|') || message.startsWith('CONFIG|') || message.startsWith('NOISE')) {
+  if (body.startsWith('STATUS|') || body.startsWith('CONFIG|') || body.startsWith('NOISE')) {
     evt.type = 'status';
-    const kv = parsePipeKv(message);
+    const kv = parsePipeKv(body);
     Object.assign(evt, kv);
     return evt;
   }
@@ -238,6 +246,11 @@ function parseEventMessageLocal(deviceId, message) {
 function resolveBoardId(client, topic, message) {
   const candidate = [];
 
+  // MQTT_ID is the board's canonical identity. It must win over a transient
+  // topic/client ID, especially for RSP|...|MQTT_ID|... on the global topic.
+  const mqttIdMatch = message.match(/(?:^|[|])MQTT_ID\|([^|]+)/i);
+  if (mqttIdMatch && mqttIdMatch[1]) candidate.push(String(mqttIdMatch[1]).trim());
+
   // 1) Preferred: <id> segment from vehicles/<id>/... topic
   const topicSegments = String(topic || '').split('/').filter(Boolean);
   if (topicSegments.length >= 3 && topicSegments[0] === 'vehicles') {
@@ -246,9 +259,6 @@ function resolveBoardId(client, topic, message) {
   }
 
   if (client && client.id && !isInternalClientId(client.id)) candidate.push(String(client.id));
-
-  const mqttIdMatch = message.match(/(?:^|[|])MQTT_ID\|([^|]+)/i);
-  if (mqttIdMatch && mqttIdMatch[1]) candidate.push(String(mqttIdMatch[1]).trim());
 
   const genericIdMatch = message.match(/(?:^|[|])(device_id|board_id|client_id|id)\:([^|]+)/i);
   if (genericIdMatch && genericIdMatch[2]) candidate.push(String(genericIdMatch[2]).trim());
@@ -294,8 +304,12 @@ function setDeviceStatus(deviceId, status, meta = {}) {
   return device;
 }
 
-function updateDeviceFromMessage(deviceId, message) {
+function updateDeviceFromMessage(deviceId, message, clientId = '') {
   let device = setDeviceStatus(deviceId, 'online');
+  if (clientId && !isInternalClientId(clientId)) {
+    device.clientIds = Array.isArray(device.clientIds) ? device.clientIds : [];
+    if (!device.clientIds.includes(clientId)) device.clientIds.push(clientId);
+  }
 
   const evt = parseEventMessageLocal(deviceId, message);
   device.lastSeen = new Date().toISOString();
@@ -303,7 +317,19 @@ function updateDeviceFromMessage(deviceId, message) {
   device.everConnected = true;
 
   if (evt.type === 'identity' && evt.boardId) {
-    device.id = evt.boardId;
+    if (device.id !== evt.boardId) {
+      const canonical = findDevice(evt.boardId);
+      if (canonical && canonical !== device) {
+        canonical.clientIds = [...new Set([...(canonical.clientIds || []), ...(device.clientIds || [])])];
+        canonical.status = 'online';
+        canonical.lastSeen = new Date().toISOString();
+        canonical.everConnected = true;
+        state.devices = state.devices.filter((entry) => entry !== device);
+        device = canonical;
+      } else {
+        device.id = evt.boardId;
+      }
+    }
     if (!device.name || device.name.startsWith('Board-')) device.name = `Board-${String(evt.boardId).slice(-4)}`;
   }
 
@@ -390,7 +416,9 @@ function trackClientLifecycle() {
       id: client.id,
       connectedAt: new Date().toISOString()
     });
-    const device = findDevice(client.id) || setDeviceStatus(client.id, 'online');
+    const device = findDeviceByClientId(client.id) || setDeviceStatus(client.id, 'online');
+    device.clientIds = Array.isArray(device.clientIds) ? device.clientIds : [];
+    if (!device.clientIds.includes(client.id)) device.clientIds.push(client.id);
     device.everConnected = true;
     if (!device.name || device.name.startsWith('Board-')) {
       device.name = `Board-${String(client.id).slice(-4)}`;
@@ -405,9 +433,10 @@ function trackClientLifecycle() {
       state.clients.delete(client.id);
       return;
     }
-    const known = findDevice(client.id);
+    const known = findDeviceByClientId(client.id);
     if (known) {
-      known.status = 'offline';
+      known.clientIds = (known.clientIds || []).filter((id) => id !== client.id);
+      known.status = known.clientIds.length ? 'online' : 'offline';
       known.lastSeen = new Date().toISOString();
     }
     state.clients.delete(client.id);
@@ -488,8 +517,16 @@ broker.on('publish', (packet, client) => {
     topic.includes('status') ||
     topic.includes('power')
   ) {
-    const deviceId = resolveBoardId(client, topic, payload);
-    if (deviceId !== 'unknown') updateDeviceFromMessage(deviceId, normalizePayload(payload));
+    let deviceId = resolveBoardId(client, topic, payload);
+    // Global command responses do not contain a board id in their topic. The
+    // command id lets the dashboard recover the target board from its pending
+    // command table, even before the board-specific topic is known.
+    if (deviceId === 'unknown' && /(^|\/)command_responses$/.test(topic)) {
+      const { cmdId } = unwrapCommandEnvelope(payload);
+      const pending = cmdId ? state.pendingCommands.get(cmdId) : null;
+      if (pending) deviceId = pending.boardId;
+    }
+    if (deviceId !== 'unknown') updateDeviceFromMessage(deviceId, normalizePayload(payload), clientId);
   }
 });
 
@@ -556,6 +593,24 @@ app.get('/api/pending-commands', (req, res) => {
 app.get('/api/device/:id', (req, res) => {
   const d = findDevice(req.params.id);
   res.json(d ? buildDeviceSummary(d) : { error: 'not_found' });
+});
+
+app.delete('/api/device/:id', (req, res) => {
+  const deviceId = String(req.params.id);
+  const device = findDevice(deviceId);
+  if (!device) return res.status(404).json({ error: 'not_found' });
+  const hasConnectedAlias = [deviceId, ...(device.clientIds || [])].some((id) => state.clients.has(id));
+  if (device.status === 'online' || hasConnectedAlias) {
+    return res.status(409).json({ error: 'board_is_connected', message: 'Disconnect the board before deleting it.' });
+  }
+
+  state.devices = state.devices.filter((d) => d.id !== deviceId);
+  state.pendingCommands.forEach((entry, commandId) => {
+    if (entry.boardId === deviceId) state.pendingCommands.delete(commandId);
+  });
+  saveDevices();
+  broadcastState();
+  res.json({ ok: true, deleted: deviceId });
 });
 
 app.post('/api/device/:id/name', (req, res) => {
@@ -637,6 +692,18 @@ app.get('/api/analytics', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mqttPort, httpPort, boards: state.devices.length });
+});
+
+// Keep API failures machine-readable. Without this, Express returns an HTML
+// error page and the browser reports a misleading JSON parse error.
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'api_route_not_found', path: req.path });
+});
+
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const status = err.status === 413 || err.type === 'entity.too.large' ? 413 : (err.status || 500);
+  res.status(status).json({ error: status === 413 ? 'firmware_too_large_max_3mb' : 'server_error' });
 });
 
 wsServer.on('connection', (socket) => {

@@ -357,12 +357,28 @@
             <div class="small">Battery: ${d.battery ?? '—'} V</div>
             <div class="small">Last reply: ${lastReply}</div>
             <div class="small">Pending: ${pending}</div>
+            ${d.status === 'online' ? '' : `<button class="delete-board" data-board-id="${escapeHtml(d.id)}" style="margin-top:8px;background:#b42318;">Delete offline board</button>`}
           `;
           item.onclick = () => {
             state.selectedId = d.id;
             renderDevices();
             renderSelectedDevice();
           };
+          const deleteButton = item.querySelector('.delete-board');
+          if (deleteButton) {
+            deleteButton.onclick = async (event) => {
+              event.stopPropagation();
+              if (!confirm(`Delete offline board ${d.id}?`)) return;
+              const response = await fetch(`/api/device/${encodeURIComponent(d.id)}`, { method: 'DELETE' });
+              const result = await response.json();
+              if (!response.ok) {
+                setLog(result.message || result.error || 'Unable to delete board');
+                return;
+              }
+              if (state.selectedId === d.id) state.selectedId = null;
+              refreshDevices();
+            };
+          }
           deviceList.appendChild(item);
         });
         if (!state.selectedId && state.devices.length) state.selectedId = state.devices[0].id;
@@ -429,7 +445,7 @@
         detector: { min_event_ms: 25, max_event_ms: 5000, enter_thresh: 1.5, exit_ratio: 0.7, auto_threshold: true, enter_sigma: 4, abs_sigma: 6, confirm_samples: 3, min_samples: 6, peak_ratio: 1.8, enter_hysteresis: 0.7, exit_hysteresis: 0.55 },
         classification: { motor_max_len: 1.2, car_max_len: 3.8, pickup_max_len: 5.2, van_max_len: 6.5, bus_max_len: 10.5, truck_s_max_len: 12, truck_2_max_len: 15, truck_3_max_len: 18, truck_4_plus_min_len: 20 },
         report: { enabled: true, interval_min: 1, clear_on_report: false },
-        mqtt: { id: '', server: '', port: 1883, user: '', pass: '', apn: '', topic_events: 'vehicles/events', topic_commands: 'vehicles/commands', topic_responses: 'vehicles/command_responses' }
+        mqtt: { id: '', server: '', port: 1011, user: '', pass: '', apn: '', topic_events: 'vehicles/events', topic_commands: 'vehicles/commands', topic_responses: 'vehicles/command_responses' }
       };
 
       function configValue(value, fallback) { return value ?? fallback; }
@@ -646,8 +662,13 @@
             headers: { 'Content-Type': 'application/octet-stream', 'X-Filename': file.name },
             body: file
           });
-          const artifact = await upload.json();
-          if (!upload.ok) throw new Error(artifact.error || 'upload_failed');
+          const uploadText = await upload.text();
+          let artifact;
+          try { artifact = JSON.parse(uploadText); }
+          catch (_) {
+            throw new Error(`HTTP ${upload.status}: dashboard returned HTML instead of JSON. Restart the mqtt-dashboard server and try again.`);
+          }
+          if (!upload.ok) throw new Error(artifact.error || `upload_failed_http_${upload.status}`);
           status.textContent = `Uploaded ${artifact.fileName} (${artifact.bytes} bytes), MD5 ${artifact.md5}`;
           const command = `OTA_UPDATE|${artifact.url}|${artifact.md5}`;
           const result = await fetch(`/api/device/${encodeURIComponent(deviceId)}/command`, {
