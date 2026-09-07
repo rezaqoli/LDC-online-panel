@@ -96,6 +96,7 @@
         <div class="panel">
           <h2>Workspace</h2>
           <nav class="menu" aria-label="Dashboard sections">
+            <button data-section="ota">Firmware OTA</button>
             <button class="active" data-section="overview">◉ Overview</button>
             <button data-section="console">⌘ Command Console</button>
             <button data-section="loop">⇄ Loop Pairs</button>
@@ -165,6 +166,17 @@
           <label class="broadcast"><input id="commandBroadcast" type="checkbox" /> Also send to all boards (<code>vehicles/commands</code>)</label>
           <div class="small" id="commandTargetHint">Target: selected board only</div>
           <div class="log" id="commandLog"></div>
+        </div>
+
+        <div class="panel section hidden" data-section-content="ota">
+          <h2>Firmware OTA over modem</h2>
+          <p class="small">Upload a PlatformIO <code>firmware.bin</code>. The dashboard calculates its MD5, hosts it for download, and sends the selected board an <code>OTA_UPDATE</code> command. Set <code>PUBLIC_BASE_URL</code> when this server is behind a proxy or uses a public hostname.</p>
+          <div class="controls">
+            <input id="firmwareFile" type="file" accept=".bin,application/octet-stream">
+            <button onclick="uploadFirmware()">Upload and start OTA</button>
+          </div>
+          <div class="small" id="firmwareStatus">No firmware uploaded.</div>
+          <div class="log" id="firmwareLog"></div>
         </div>
 
         <div class="panel section hidden" data-section-content="config">
@@ -394,7 +406,12 @@
       }
 
       const configDefaults = {
-        loopPairs: [{ enabled: true, distance_m: 2.2, sensor1: 0, ch1: 0, sensor2: 1, ch2: 0 }],
+        loopPairs: [
+          { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 0, sensor2: 0, ch2: 1 },
+          { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 2, sensor2: 0, ch2: 3 },
+          { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 0, sensor2: 1, ch2: 1 },
+          { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 2, sensor2: 1, ch2: 3 }
+        ],
         detector: { min_event_ms: 25, max_event_ms: 5000, enter_thresh: 1.5, exit_ratio: 0.7, auto_threshold: true, enter_sigma: 4, abs_sigma: 6, confirm_samples: 3, min_samples: 6, peak_ratio: 1.8, enter_hysteresis: 0.7, exit_hysteresis: 0.55 },
         classification: { motor_max_len: 1.2, car_max_len: 3.8, pickup_max_len: 5.2, van_max_len: 6.5, bus_max_len: 10.5, truck_s_max_len: 12, truck_2_max_len: 15, truck_3_max_len: 18, truck_4_plus_min_len: 20 },
         report: { enabled: true, interval_min: 1, clear_on_report: false },
@@ -599,6 +616,37 @@
         }).then((r) => r.json()).then((d) => {
           setLog(JSON.stringify(d, null, 2));
         });
+      }
+
+      async function uploadFirmware() {
+        const deviceId = state.selectedId;
+        const file = document.getElementById('firmwareFile').files[0];
+        const status = document.getElementById('firmwareStatus');
+        if (!deviceId) { status.textContent = 'Select a board first.'; return; }
+        if (!file || !/\.bin$/i.test(file.name)) { status.textContent = 'Select a firmware.bin file.'; return; }
+        if (!confirm('Upload this firmware and restart the selected board after validation?')) return;
+        status.textContent = 'Uploading firmware...';
+        try {
+          const upload = await fetch('/api/firmware', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/octet-stream', 'X-Filename': file.name },
+            body: file
+          });
+          const artifact = await upload.json();
+          if (!upload.ok) throw new Error(artifact.error || 'upload_failed');
+          status.textContent = `Uploaded ${artifact.fileName} (${artifact.bytes} bytes), MD5 ${artifact.md5}`;
+          const command = `OTA_UPDATE|${artifact.url}|${artifact.md5}`;
+          const result = await fetch(`/api/device/${encodeURIComponent(deviceId)}/command`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command, broadcast: false })
+          });
+          const sent = await result.json();
+          if (!result.ok) throw new Error(sent.error || 'command_failed');
+          document.getElementById('firmwareLog').textContent = JSON.stringify(sent, null, 2);
+        } catch (err) {
+          status.textContent = `OTA failed: ${err.message}`;
+        }
       }
 
       function selectSection(section) {

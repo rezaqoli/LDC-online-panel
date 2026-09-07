@@ -92,10 +92,10 @@
       "id": "15",
       "name": "Board-15",
       "status": "offline",
-      "lastSeen": "2026-09-07T10:48:11.143Z",
+      "lastSeen": "2026-09-07T12:17:59.692Z",
       "power": {
         "battery": 0,
-        "solar": 11.08,
+        "solar": 11.07,
         "low": true
       },
       "network": {
@@ -699,36 +699,6 @@
         }
       ],
       "history": [
-        {
-          "ts": "2026-09-07T07:42:23.938Z",
-          "message": "MQTT_ID|15",
-          "type": "identity"
-        },
-        {
-          "ts": "2026-09-07T07:42:23.939Z",
-          "message": "MQTT_ID|15",
-          "type": "identity"
-        },
-        {
-          "ts": "2026-09-07T07:42:49.141Z",
-          "message": "MQTT_ID|15",
-          "type": "identity"
-        },
-        {
-          "ts": "2026-09-07T07:42:49.232Z",
-          "message": "MQTT_ID|15",
-          "type": "identity"
-        },
-        {
-          "ts": "2026-09-07T07:42:50.662Z",
-          "message": "CMD|1|GET_STATUS",
-          "type": "raw"
-        },
-        {
-          "ts": "2026-09-07T07:42:51.373Z",
-          "message": "RSP|1|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
-          "type": "raw"
-        },
         {
           "ts": "2026-09-07T07:42:51.699Z",
           "message": "STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
@@ -1668,6 +1638,66 @@
           "ts": "2026-09-07T10:48:11.143Z",
           "message": "MQTT_ID|15",
           "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T12:05:11.304Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T12:05:11.407Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T12:05:51.991Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T12:05:52.122Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T12:08:58.626Z",
+          "message": "POWER|bat:0.00|sol:11.05|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T12:09:57.664Z",
+          "message": "POWER|bat:0.00|sol:11.06|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T12:10:58.141Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T12:14:58.780Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T12:15:47.013Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T12:15:47.154Z",
+          "message": "MQTT_ID|15",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-07T12:15:57.816Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-07T12:17:59.692Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
         }
       ],
       "everConnected": true,

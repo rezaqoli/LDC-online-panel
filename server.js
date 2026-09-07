@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const WebSocket = require('ws');
 const aedes = require('aedes');
 const { v4: uuidv4 } = require('uuid');
@@ -22,6 +23,7 @@ const mqttPort = process.env.MQTT_PORT || 1010;
 const httpPort = process.env.PORT || 3000;
 const dataDir = path.join(__dirname, 'data');
 const devicesFile = path.join(dataDir, 'devices.json');
+const firmwareDir = path.join(dataDir, 'firmware');
 
 const state = {
   devices: [],
@@ -43,8 +45,10 @@ function defaultProfile() {
   return {
     name: 'New Board',
     loopPairs: [
-      { enabled: true, distance_m: 2.2, sensor1: 0, ch1: 0, sensor2: 1, ch2: 0 },
-      { enabled: false, distance_m: 2.4, sensor1: 0, ch1: 1, sensor2: 1, ch2: 1 }
+      { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 0, sensor2: 0, ch2: 1 },
+      { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 2, sensor2: 0, ch2: 3 },
+      { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 0, sensor2: 1, ch2: 1 },
+      { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 2, sensor2: 1, ch2: 3 }
     ],
     detector: {
       min_event_ms: 25,
@@ -68,7 +72,7 @@ function defaultProfile() {
     },
     report: {
       enabled: true,
-      interval_min: 1,
+      interval_min: 5,
       clear_on_report: false
     }
   };
@@ -76,6 +80,7 @@ function defaultProfile() {
 
 function ensureDataDir() {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(firmwareDir)) fs.mkdirSync(firmwareDir, { recursive: true });
   if (!fs.existsSync(devicesFile)) {
     fs.writeFileSync(devicesFile, JSON.stringify({ devices: [] }, null, 2));
   }
@@ -487,6 +492,36 @@ edgeClient.on('message', (topic, payload) => {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// The board pulls this artifact over cellular during OTA. Set PUBLIC_BASE_URL
+// when the dashboard is behind a proxy or has a public hostname different from
+// the incoming request host.
+app.post('/api/firmware', express.raw({ type: ['application/octet-stream', 'application/x-binary'], limit: '3mb' }), (req, res) => {
+  if (!Buffer.isBuffer(req.body) || req.body.length < 1024) {
+    return res.status(400).json({ error: 'firmware_body_missing_or_too_small' });
+  }
+  const originalName = String(req.get('x-filename') || 'firmware.bin');
+  if (!/\.bin$/i.test(originalName)) return res.status(400).json({ error: 'firmware_must_be_bin' });
+  const fileName = `${uuidv4()}.bin`;
+  const filePath = path.join(firmwareDir, fileName);
+  try {
+    fs.writeFileSync(filePath, req.body, { flag: 'wx' });
+    const md5 = crypto.createHash('md5').update(req.body).digest('hex');
+    const baseUrl = String(process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    res.status(201).json({ ok: true, fileName: originalName, bytes: req.body.length, md5, url: `${baseUrl}/firmware/${fileName}` });
+  } catch (err) {
+    try { fs.unlinkSync(filePath); } catch (_) {}
+    res.status(500).json({ error: 'firmware_store_failed' });
+  }
+});
+
+app.get('/firmware/:file', (req, res) => {
+  const file = String(req.params.file || '');
+  if (!/^[0-9a-f-]+\.bin$/i.test(file)) return res.sendStatus(404);
+  res.sendFile(path.join(firmwareDir, file), (err) => {
+    if (err && !res.headersSent) res.sendStatus(err.statusCode === 404 ? 404 : 500);
+  });
+});
+
 app.get('/api/devices', (req, res) => {
   res.json({ devices: state.devices.map(buildDeviceSummary), stats: computeGlobalAnalytics() });
 });
@@ -543,10 +578,11 @@ app.post('/api/device/:id/command', (req, res) => {
   const cmd = String(req.body?.command || '');
   const broadcast = req.body?.broadcast === true;
   if (!cmd) return res.status(400).json({ error: 'empty_command' });
-  const cmdId = String(++state.cmdCounter);
+  const cmdId = uuidv4();
   const envelope = `CMD|${cmdId}|${cmd}`;
-  const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`];
-  if (broadcast) topics.push('vehicles/commands');
+  // A broadcast is global-only. Publishing both would execute the command twice
+  // on the selected vehicle, which subscribes to both topic forms.
+  const topics = [broadcast ? 'vehicles/commands' : `vehicles/${encodeURIComponent(d.id)}/commands`];
   const client = getCommandClient();
   let pending = false;
   topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
