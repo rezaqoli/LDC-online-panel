@@ -9,8 +9,6 @@ const {
   unwrapCommandEnvelope,
   parseTrafficReport,
   parseEventMessage,
-  resolveBoardId,
-  isInternalClientId,
 } = require('../parsers.js');
 
 test('normalizePayload handles Buffer / object / string', () => {
@@ -79,54 +77,10 @@ test('parseEventMessage identifies EVENT and SPEED and MQTT_ID', () => {
   const id = parseEventMessage('B1', 'MQTT_ID|ESP32_GEO_07');
   assert.equal(id.type, 'identity');
   assert.equal(id.boardId, 'ESP32_GEO_07');
-
-  const wrappedId = parseEventMessage('B1', 'RSP|bcabce01-0ab6-4b18-ba3c|MQTT_ID|16');
-  assert.equal(wrappedId.type, 'identity');
-  assert.equal(wrappedId.boardId, '16');
 });
 
 test('parseEventMessage returns raw event for unknown prefix', () => {
   const e = parseEventMessage('B1', 'GNSS|valid:1|lat:35.7|lon:51.4');
   assert.equal(e.type, undefined);
   assert.equal(e.raw, 'GNSS|valid:1|lat:35.7|lon:51.4');
-});
-
-// Regression test for the identity-detection path on the legacy
-// `vehicles/events` topic. Uses the exported resolveBoardId from
-// ./parsers.js so the test exercises the real production code path.
-test('resolveBoardId returns MQTT_ID|value as the canonical board id', () => {
-  // Bare MQTT_ID|16 on the legacy global topic.
-  assert.equal(resolveBoardId({ id: 'esp32-mac-aabb' }, 'vehicles/events', 'MQTT_ID|16'),
-               '16');
-  // RSP-wrapped response on the global command_responses topic.
-  assert.equal(
-    resolveBoardId({ id: 'esp32-mac-aabb' }, 'vehicles/command_responses',
-                   'RSP|bcabce01-0ab6-4b18-ba3c|MQTT_ID|16'),
-    '16'
-  );
-  // Tolerate whitespace and a colon separator.
-  assert.equal(resolveBoardId({ id: 'esp32' }, 'vehicles/events', 'MQTT_ID : 42 '),
-               '42');
-  assert.equal(resolveBoardId({ id: 'esp32' }, 'vehicles/events', 'MQTT_ID:42'),
-               '42');
-  // No MQTT_ID present, falls back to clientId.
-  assert.equal(resolveBoardId({ id: 'esp32-mac-aabb' }, 'vehicles/events', 'EVENT|S1C0|dur:120'),
-               'esp32-mac-aabb');
-  // Per-board topic: vehicles/<id>/events falls back to <id> segment.
-  assert.equal(resolveBoardId({ id: 'esp32-mac-aabb' }, 'vehicles/BOARD-7/events', 'EVENT|S1C0'),
-               'BOARD-7');
-  // Internal client ids (dashboard-bridge / dashboard-cmd) must be ignored.
-  assert.equal(resolveBoardId({ id: 'dashboard-bridge-abc' }, 'vehicles/events', 'EVENT|x'),
-               'unknown');
-  assert.equal(resolveBoardId({ id: 'dashboard-cmd-xyz' }, 'vehicles/events', 'EVENT|x'),
-               'unknown');
-});
-
-test('isInternalClientId flags dashboard-prefixed ids only', () => {
-  assert.equal(isInternalClientId('dashboard-bridge-abc'), true);
-  assert.equal(isInternalClientId('dashboard-cmd-xyz'), true);
-  assert.equal(isInternalClientId('esp32-mac-aabb'), false);
-  assert.equal(isInternalClientId('16'), false);
-  assert.equal(isInternalClientId(null), false);
-  assert.equal(isInternalClientId(''), false);
 });

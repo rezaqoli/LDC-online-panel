@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
-const crypto = require('crypto');
 const WebSocket = require('ws');
 const aedes = require('aedes');
 const { v4: uuidv4 } = require('uuid');
@@ -13,8 +12,6 @@ const {
   unwrapCommandEnvelope,
   parseTrafficReport,
   parseEventMessage,
-  isInternalClientId,
-  resolveBoardId,
 } = require('./parsers.js');
 
 const app = express();
@@ -25,7 +22,6 @@ const mqttPort = process.env.MQTT_PORT || 1010;
 const httpPort = process.env.PORT || 3000;
 const dataDir = path.join(__dirname, 'data');
 const devicesFile = path.join(dataDir, 'devices.json');
-const firmwareDir = path.join(dataDir, 'firmware');
 
 const state = {
   devices: [],
@@ -47,10 +43,8 @@ function defaultProfile() {
   return {
     name: 'New Board',
     loopPairs: [
-      { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 0, sensor2: 0, ch2: 1 },
-      { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 2, sensor2: 0, ch2: 3 },
-      { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 0, sensor2: 1, ch2: 1 },
-      { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 2, sensor2: 1, ch2: 3 }
+      { enabled: true, distance_m: 2.2, sensor1: 0, ch1: 0, sensor2: 1, ch2: 0 },
+      { enabled: false, distance_m: 2.4, sensor1: 0, ch1: 1, sensor2: 1, ch2: 1 }
     ],
     detector: {
       min_event_ms: 25,
@@ -74,7 +68,7 @@ function defaultProfile() {
     },
     report: {
       enabled: true,
-      interval_min: 5,
+      interval_min: 1,
       clear_on_report: false
     }
   };
@@ -82,7 +76,6 @@ function defaultProfile() {
 
 function ensureDataDir() {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  if (!fs.existsSync(firmwareDir)) fs.mkdirSync(firmwareDir, { recursive: true });
   if (!fs.existsSync(devicesFile)) {
     fs.writeFileSync(devicesFile, JSON.stringify({ devices: [] }, null, 2));
   }
@@ -132,11 +125,6 @@ function findDevice(deviceId) {
   return state.devices.find((d) => d.id === deviceId);
 }
 
-function findDeviceByClientId(clientId) {
-  const id = String(clientId || '');
-  return state.devices.find((d) => d.id === id || (Array.isArray(d.clientIds) && d.clientIds.includes(id)));
-}
-
 function buildDeviceSummary(device) {
   const profile = device.profile || defaultProfile();
   return {
@@ -150,7 +138,6 @@ function buildDeviceSummary(device) {
     signal: device.network?.signal ?? null,
     loopConfig: device.loopConfig ?? profile.loopPairs ?? null,
     classification: device.classification ?? profile.classification ?? null,
-    ota: device.ota ?? null,
     profile,
     stats: device.stats ?? null,
     lastReply: device.lastReply ?? null,
@@ -169,24 +156,21 @@ function buildDeviceSummary(device) {
 
 function parseEventMessageLocal(deviceId, message) {
   const evt = { deviceId, raw: message, ts: new Date().toISOString() };
-  // Responses are commonly wrapped as RSP|<request-id>|<payload>. Parse the
-  // payload for its meaning while keeping the complete message in raw.
-  const body = unwrapCommandEnvelope(message).body.trim();
-  if (body.startsWith('MQTT_ID|')) {
-    const value = body.substring('MQTT_ID|'.length).trim();
+  if (message.startsWith('MQTT_ID|')) {
+    const value = message.substring('MQTT_ID|'.length).trim();
     evt.type = 'identity';
     evt.boardId = value;
     evt.clientId = value;
     return evt;
   }
-  if (body.startsWith('EVENT|')) {
-    const kv = parsePipeKv(body.substring('EVENT|'.length));
+  if (message.startsWith('EVENT|')) {
+    const kv = parsePipeKv(message.substring('EVENT|'.length));
     Object.assign(evt, kv);
     evt.type = 'event';
     return evt;
   }
-  if (body.startsWith('SPEED|')) {
-    const kv = parsePipeKv(body.substring('SPEED|'.length));
+  if (message.startsWith('SPEED|')) {
+    const kv = parsePipeKv(message.substring('SPEED|'.length));
     Object.assign(evt, kv);
     evt.type = 'speed';
     evt.loopIndex = Number(kv.idx || 0);
@@ -199,8 +183,8 @@ function parseEventMessageLocal(deviceId, message) {
     evt.measurementType = kv.type || null;
     return evt;
   }
-  if (body.startsWith('POWER|')) {
-    const kv = parsePipeKv(body.substring('POWER|'.length));
+  if (message.startsWith('POWER|')) {
+    const kv = parsePipeKv(message.substring('POWER|'.length));
     evt.type = 'power';
     evt.power = {
       battery: Number(kv.bat || 0),
@@ -209,40 +193,56 @@ function parseEventMessageLocal(deviceId, message) {
     };
     return evt;
   }
-  if (body.startsWith('BATTERY_LOW|') || body.startsWith('BATTERY_OK|')) {
+  if (message.startsWith('BATTERY_LOW|') || message.startsWith('BATTERY_OK|')) {
     evt.type = 'battery';
-    evt.power = { battery: Number((parsePipeKv(body.substring(body.indexOf('|') + 1)).bat || 0)) };
+    evt.power = { battery: Number((parsePipeKv(message.substring(message.indexOf('|') + 1)).bat || 0)) };
     return evt;
   }
-  if (body.startsWith('TRAFFIC_REPORT')) {
+  if (message.startsWith('TRAFFIC_REPORT')) {
     evt.type = 'traffic-report';
-    Object.assign(evt, parseTrafficReport(body, deviceId));
+    Object.assign(evt, parseTrafficReport(message, deviceId));
     return evt;
   }
-  if (body.startsWith('OTA_STATUS|') || body.startsWith('OTA_SUCCESS|') || body.startsWith('OTA_ERROR|')) {
-    const separator = body.indexOf('|');
-    evt.type = 'ota';
-    evt.state = body.substring(0, separator).substring(4).replace(/^_/, '').toLowerCase();
-    evt.detail = separator >= 0 ? body.substring(separator + 1) : '';
-    return evt;
-  }
-  if (body.startsWith('OTA_PROGRESS|')) {
-    const parts = body.split('|');
-    evt.type = 'ota';
-    evt.state = 'progress';
-    evt.received = Number(parts[1] || 0);
-    evt.total = Number(parts[2] || 0);
-    evt.percent = evt.total > 0 ? Math.min(100, Math.round((evt.received / evt.total) * 100)) : 0;
-    return evt;
-  }
-  if (body.startsWith('STATUS|') || body.startsWith('CONFIG|') || body.startsWith('NOISE')) {
+  if (message.startsWith('STATUS|') || message.startsWith('CONFIG|') || message.startsWith('NOISE')) {
     evt.type = 'status';
-    const kv = parsePipeKv(body);
+    const kv = parsePipeKv(message);
     Object.assign(evt, kv);
     return evt;
   }
   evt.type = 'raw';
   return evt;
+}
+
+function resolveBoardId(client, topic, message) {
+  const candidate = [];
+
+  // 1) Preferred: <id> segment from vehicles/<id>/... topic
+  const topicSegments = String(topic || '').split('/').filter(Boolean);
+  if (topicSegments.length >= 3 && topicSegments[0] === 'vehicles') {
+    const seg = topicSegments[1];
+    if (seg && !['+', '#'].includes(seg)) candidate.push(seg);
+  }
+
+  if (client && client.id && !isInternalClientId(client.id)) candidate.push(String(client.id));
+
+  const mqttIdMatch = message.match(/(?:^|[|])MQTT_ID\|([^|]+)/i);
+  if (mqttIdMatch && mqttIdMatch[1]) candidate.push(String(mqttIdMatch[1]).trim());
+
+  const genericIdMatch = message.match(/(?:^|[|])(device_id|board_id|client_id|id)\:([^|]+)/i);
+  if (genericIdMatch && genericIdMatch[2]) candidate.push(String(genericIdMatch[2]).trim());
+
+  if (topicSegments.length) {
+    topicSegments.forEach((segment) => {
+      if (segment && !['vehicles', 'commands', 'command_responses', 'events', 'report', 'status', 'power', 'speed', '+', '#'].includes(segment)) candidate.push(segment);
+    });
+  }
+
+  for (const value of candidate) {
+    const cleaned = value.trim();
+    if (cleaned && cleaned !== 'unknown') return cleaned;
+  }
+
+  return 'unknown';
 }
 
 function setDeviceStatus(deviceId, status, meta = {}) {
@@ -272,12 +272,8 @@ function setDeviceStatus(deviceId, status, meta = {}) {
   return device;
 }
 
-function updateDeviceFromMessage(deviceId, message, clientId = '') {
+function updateDeviceFromMessage(deviceId, message) {
   let device = setDeviceStatus(deviceId, 'online');
-  if (clientId && !isInternalClientId(clientId)) {
-    device.clientIds = Array.isArray(device.clientIds) ? device.clientIds : [];
-    if (!device.clientIds.includes(clientId)) device.clientIds.push(clientId);
-  }
 
   const evt = parseEventMessageLocal(deviceId, message);
   device.lastSeen = new Date().toISOString();
@@ -285,19 +281,7 @@ function updateDeviceFromMessage(deviceId, message, clientId = '') {
   device.everConnected = true;
 
   if (evt.type === 'identity' && evt.boardId) {
-    if (device.id !== evt.boardId) {
-      const canonical = findDevice(evt.boardId);
-      if (canonical && canonical !== device) {
-        canonical.clientIds = [...new Set([...(canonical.clientIds || []), ...(device.clientIds || [])])];
-        canonical.status = 'online';
-        canonical.lastSeen = new Date().toISOString();
-        canonical.everConnected = true;
-        state.devices = state.devices.filter((entry) => entry !== device);
-        device = canonical;
-      } else {
-        device.id = evt.boardId;
-      }
-    }
+    device.id = evt.boardId;
     if (!device.name || device.name.startsWith('Board-')) device.name = `Board-${String(evt.boardId).slice(-4)}`;
   }
 
@@ -307,17 +291,6 @@ function updateDeviceFromMessage(deviceId, message, clientId = '') {
 
   if (evt.type === 'status') {
     device.statusInfo = evt;
-  }
-
-  if (evt.type === 'ota') {
-    device.ota = {
-      state: evt.state,
-      received: evt.received ?? null,
-      total: evt.total ?? null,
-      percent: evt.percent ?? null,
-      ts: evt.ts,
-      raw: evt.raw
-    };
   }
 
   if (evt.type === 'traffic-report') {
@@ -384,9 +357,7 @@ function trackClientLifecycle() {
       id: client.id,
       connectedAt: new Date().toISOString()
     });
-    const device = findDeviceByClientId(client.id) || setDeviceStatus(client.id, 'online');
-    device.clientIds = Array.isArray(device.clientIds) ? device.clientIds : [];
-    if (!device.clientIds.includes(client.id)) device.clientIds.push(client.id);
+    const device = findDevice(client.id) || setDeviceStatus(client.id, 'online');
     device.everConnected = true;
     if (!device.name || device.name.startsWith('Board-')) {
       device.name = `Board-${String(client.id).slice(-4)}`;
@@ -401,16 +372,20 @@ function trackClientLifecycle() {
       state.clients.delete(client.id);
       return;
     }
-    const known = findDeviceByClientId(client.id);
+    const known = findDevice(client.id);
     if (known) {
-      known.clientIds = (known.clientIds || []).filter((id) => id !== client.id);
-      known.status = known.clientIds.length ? 'online' : 'offline';
+      known.status = 'offline';
       known.lastSeen = new Date().toISOString();
     }
     state.clients.delete(client.id);
     saveDevices();
     broadcastState();
   });
+}
+
+function isInternalClientId(id) {
+  if (!id) return false;
+  return /^dashboard-(bridge|cmd)-/i.test(String(id));
 }
 
 function computeGlobalAnalytics() {
@@ -464,26 +439,29 @@ broker.on('clientError', (client, err) => {
 
 broker.on('publish', (packet, client) => {
   if (!packet || !packet.topic) return;
-  const topic = String(packet.topic);
+  const topic = packet.topic;
   const payload = packet.payload ? packet.payload.toString() : '';
   const clientId = client?.id || '';
   const isCommandTopic = topic === 'vehicles/commands' || /\/commands$/.test(topic);
   const kind = isCommandTopic ? 'out' : 'in';
-  if (process.env.DEBUG_MQTT === '1') {
-    console.log(`[mqtt] ${kind} ${topic} (client=${clientId || '-'}) ${payload}`);
+  recordMessage(kind, topic, payload, clientId);
+  if (
+    /\/events$/.test(topic) ||
+    /\/command_responses$/.test(topic) ||
+    /\/speed$/.test(topic) ||
+    topic === 'vehicles/events' ||
+    topic === 'vehicles/command_responses' ||
+    topic.includes('report') ||
+    topic.includes('status') ||
+    topic.includes('power')
+  ) {
+    const deviceId = resolveBoardId(client, topic, payload);
+    if (deviceId !== 'unknown') updateDeviceFromMessage(deviceId, normalizePayload(payload));
   }
 });
 
 // MQTT client to subscribe to board topics and relay into the dashboard state.
-// By default it connects to the local aedes broker, but when the ESP32
-// publishes to a different broker (e.g. a cellular MQTT relay at 1011),
-// set MQTT_URL=mqtt://host:port to point the bridge at the real broker.
-const edgeBrokerUrl = process.env.MQTT_URL || ('mqtt://localhost:' + mqttPort);
-const mqttClientOptions = { protocolVersion: 4, clean: true };
-const edgeClient = mqtt.connect(edgeBrokerUrl, {
-  ...mqttClientOptions,
-  clientId: 'dashboard-bridge-' + uuidv4()
-});
+const edgeClient = mqtt.connect('mqtt://localhost:' + mqttPort, { clientId: 'dashboard-bridge-' + uuidv4() });
 edgeClient.on('connect', () => {
   const subs = [
     'vehicles/+/events',
@@ -495,65 +473,19 @@ edgeClient.on('connect', () => {
     'vehicles/commands'
   ];
   subs.forEach((t) => edgeClient.subscribe(t));
-  console.log(`[dashboard] bridge connected to ${edgeBrokerUrl}, subscribed to per-board and legacy topics`);
-});
-edgeClient.on('error', (err) => {
-  console.error(`[dashboard] bridge error on ${edgeBrokerUrl}: ${err.message}`);
+  console.log('[dashboard] subscribed to per-board and legacy topics');
 });
 edgeClient.on('message', (topic, payload) => {
-  const rawPayload = normalizePayload(payload.toString());
-  const isCommandTopic = topic === 'vehicles/commands' || /\/commands$/.test(topic);
-  recordMessage(isCommandTopic ? 'out' : 'in', topic, rawPayload, 'dashboard-bridge');
-
-  if (!isCommandTopic && (
-    /\/events$/.test(topic) ||
-    /\/command_responses$/.test(topic) ||
-    /\/speed$/.test(topic) ||
-    topic === 'vehicles/events' ||
-    topic === 'vehicles/command_responses' ||
-    topic.includes('report') || topic.includes('status') || topic.includes('power')
-  )) {
-    let deviceId = resolveBoardId(null, topic, rawPayload);
-    if (deviceId === 'unknown' && /(^|\/)command_responses$/.test(topic)) {
-      const { cmdId } = unwrapCommandEnvelope(rawPayload);
-      const pending = cmdId ? state.pendingCommands.get(cmdId) : null;
-      if (pending) deviceId = pending.boardId;
-    }
-    if (deviceId !== 'unknown') updateDeviceFromMessage(deviceId, rawPayload, 'dashboard-bridge');
-  }
+  const rawPayload = payload.toString();
+  recordMessage(/\/commands$/.test(topic) || topic === 'vehicles/commands' ? 'out' : 'in', topic, rawPayload, 'dashboard-bridge');
+  if (rawPayload.startsWith('CMD|')) return;
+  // Prefer the <id> segment from the topic; otherwise try payload heuristics.
+  const resolved = resolveBoardId(null, topic, rawPayload);
+  if (resolved !== 'unknown') updateDeviceFromMessage(resolved, normalizePayload(rawPayload));
 });
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// The board pulls this artifact over cellular during OTA. Set PUBLIC_BASE_URL
-// when the dashboard is behind a proxy or has a public hostname different from
-// the incoming request host.
-app.post('/api/firmware', express.raw({ type: ['application/octet-stream', 'application/x-binary'], limit: '3mb' }), (req, res) => {
-  if (!Buffer.isBuffer(req.body) || req.body.length < 1024) {
-    return res.status(400).json({ error: 'firmware_body_missing_or_too_small' });
-  }
-  const originalName = String(req.get('x-filename') || 'firmware.bin');
-  if (!/\.bin$/i.test(originalName)) return res.status(400).json({ error: 'firmware_must_be_bin' });
-  const fileName = `${uuidv4()}.bin`;
-  const filePath = path.join(firmwareDir, fileName);
-  try {
-    fs.writeFileSync(filePath, req.body, { flag: 'wx' });
-    const md5 = crypto.createHash('md5').update(req.body).digest('hex');
-    const baseUrl = String(process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
-    res.status(201).json({ ok: true, fileName: originalName, bytes: req.body.length, md5, url: `${baseUrl}/firmware/${fileName}` });
-  } catch (err) {
-    try { fs.unlinkSync(filePath); } catch (_) {}
-    res.status(500).json({ error: 'firmware_store_failed' });
-  }
-});
-
-app.get('/firmware/:file', (req, res) => {
-  const file = String(req.params.file || '');
-  if (!/^[0-9a-f-]+\.bin$/i.test(file)) return res.sendStatus(404);
-  res.sendFile(path.join(firmwareDir, file), (err) => {
-    if (err && !res.headersSent) res.sendStatus(err.statusCode === 404 ? 404 : 500);
-  });
-});
 
 app.get('/api/devices', (req, res) => {
   res.json({ devices: state.devices.map(buildDeviceSummary), stats: computeGlobalAnalytics() });
@@ -570,24 +502,6 @@ app.get('/api/pending-commands', (req, res) => {
 app.get('/api/device/:id', (req, res) => {
   const d = findDevice(req.params.id);
   res.json(d ? buildDeviceSummary(d) : { error: 'not_found' });
-});
-
-app.delete('/api/device/:id', (req, res) => {
-  const deviceId = String(req.params.id);
-  const device = findDevice(deviceId);
-  if (!device) return res.status(404).json({ error: 'not_found' });
-  const hasConnectedAlias = [deviceId, ...(device.clientIds || [])].some((id) => state.clients.has(id));
-  if (device.status === 'online' || hasConnectedAlias) {
-    return res.status(409).json({ error: 'board_is_connected', message: 'Disconnect the board before deleting it.' });
-  }
-
-  state.devices = state.devices.filter((d) => d.id !== deviceId);
-  state.pendingCommands.forEach((entry, commandId) => {
-    if (entry.boardId === deviceId) state.pendingCommands.delete(commandId);
-  });
-  saveDevices();
-  broadcastState();
-  res.json({ ok: true, deleted: deviceId });
 });
 
 app.post('/api/device/:id/name', (req, res) => {
@@ -618,10 +532,7 @@ app.post('/api/device/:id/profile', (req, res) => {
 let commandClient = null;
 function getCommandClient() {
   if (!commandClient || !commandClient.connected) {
-    commandClient = mqtt.connect(edgeBrokerUrl, {
-      ...mqttClientOptions,
-      clientId: 'dashboard-cmd-' + uuidv4()
-    });
+    commandClient = mqtt.connect('mqtt://localhost:' + mqttPort, { clientId: 'dashboard-cmd-' + uuidv4() });
   }
   return commandClient;
 }
@@ -632,14 +543,13 @@ app.post('/api/device/:id/command', (req, res) => {
   const cmd = String(req.body?.command || '');
   const broadcast = req.body?.broadcast === true;
   if (!cmd) return res.status(400).json({ error: 'empty_command' });
-  const cmdId = uuidv4();
+  const cmdId = String(++state.cmdCounter);
   const envelope = `CMD|${cmdId}|${cmd}`;
-  // A broadcast is global-only. Publishing both would execute the command twice
-  // on the selected vehicle, which subscribes to both topic forms.
-  const topics = [broadcast ? 'vehicles/commands' : `vehicles/${encodeURIComponent(d.id)}/commands`];
+  const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`];
+  if (broadcast) topics.push('vehicles/commands');
   const client = getCommandClient();
-  // Register the correlation entry before publishing. A local/low-latency
-  // broker can deliver the board response immediately.
+  let pending = false;
+  topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
   state.pendingCommands.set(cmdId, {
     cmdId,
     boardId: d.id,
@@ -649,8 +559,25 @@ app.post('/api/device/:id/command', (req, res) => {
     ts: new Date().toISOString(),
     status: 'pending'
   });
-  topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
   res.json({ ok: true, cmdId, topics, command: cmd });
+});
+
+app.delete('/api/device/:id', (req, res) => {
+  const deviceId = req.params.id;
+  const idx = state.devices.findIndex((d) => d.id === deviceId);
+  if (idx === -1) return res.status(404).json({ error: 'not_found' });
+
+  const device = state.devices[idx];
+  // Only allow deletion of offline devices
+  if (device.status === 'online') {
+    return res.status(400).json({ error: 'Cannot delete online device. Wait for it to go offline first.' });
+  }
+
+  // Remove from array
+  state.devices.splice(idx, 1);
+  saveDevices();
+  broadcastState();
+  res.json({ ok: true, deletedId: deviceId });
 });
 
 app.get('/api/analytics', (req, res) => {
@@ -673,18 +600,6 @@ app.get('/api/analytics', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mqttPort, httpPort, boards: state.devices.length });
-});
-
-// Keep API failures machine-readable. Without this, Express returns an HTML
-// error page and the browser reports a misleading JSON parse error.
-app.use('/api', (req, res) => {
-  res.status(404).json({ error: 'api_route_not_found', path: req.path });
-});
-
-app.use((err, req, res, next) => {
-  if (res.headersSent) return next(err);
-  const status = err.status === 413 || err.type === 'entity.too.large' ? 413 : (err.status || 500);
-  res.status(status).json({ error: status === 413 ? 'firmware_too_large_max_3mb' : 'server_error' });
 });
 
 wsServer.on('connection', (socket) => {

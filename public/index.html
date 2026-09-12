@@ -1,250 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LDC Fleet Dashboard</title>
-    <style>
-      :root {
-        --bg: #0b1020;
-        --panel: #121b2d;
-        --panel-2: #182540;
-        --text: #ebf3ff;
-        --muted: #9bb0d1;
-        --primary: #45b7ff;
-        --success: #23d18b;
-        --warning: #f5b841;
-        --danger: #ef5d56;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif;
-      }
-      .topbar {
-        display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; background: var(--panel);
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-      }
-      .topbar h1 { margin: 0; font-size: 1.4rem; }
-      .stats { display: grid; grid-template-columns: repeat(5, minmax(110px,1fr)); gap: 14px; padding: 16px 22px; }
-      .card {
-        background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 12px; padding: 16px;
-      }
-      .card h3 { margin: 0 0 8px; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
-      .big { font-size: 1.8rem; font-weight: bold; }
-      .layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; padding: 0 22px 22px; }
-      .sidebar, .main { display: flex; flex-direction: column; gap: 16px; }
-      .menu { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
-      .menu button { text-align: left; background: transparent; color: var(--muted); border: 0; }
-      .menu button:hover, .menu button.active { background: rgba(69,183,255,.14); color: var(--text); }
-      .device-list { display: flex; flex-direction: column; gap: 10px; }
-      .device-item { background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; cursor: pointer; }
-      .device-item.active { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(69,183,255,0.4); }
-      .device-item .row { display: flex; justify-content: space-between; align-items: center; }
-      .pill { padding: 4px 8px; border-radius: 999px; font-size: 0.7rem; background: rgba(35,209,139,0.15); color: var(--success); }
-      .pill.offline { background: rgba(239,93,86,0.15); color: var(--danger); }
-      .panel { background: var(--panel); border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.08); }
-      .panel h2 { margin-top: 0; }
-      .grid2 { display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: 12px; }
-      .meta { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-      .controls { display: flex; flex-wrap: wrap; gap: 8px; }
-      input, select, button {
-        border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0d162a; color: var(--text); padding: 8px 10px;
-      }
-      button { background: var(--primary); color: #06111b; font-weight: bold; cursor: pointer; }
-      .log { max-height: 260px; overflow: auto; white-space: pre-wrap; background: #091322; border-radius: 10px; padding: 10px; font-family: Consolas, monospace; font-size: 12px; }
-      .message-log { height: 320px; overflow: auto; background: #091322; border-radius: 10px; padding: 10px; font-family: Consolas, monospace; font-size: 12px; }
-      .message-line { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); white-space: pre-wrap; overflow-wrap: anywhere; }
-      .message-line.in { color: #8ff4a2; }
-      .message-line.out { color: #79c0ff; }
-      .message-line.err { color: #ff7b7b; }
-      .message-line.sys { color: #ffd966; }
-      .message-meta { color: var(--muted); }
-      .config-section { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; margin-top: 14px; }
-      .config-section:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
-      .config-grid { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 8px; align-items: end; }
-      .field { display: flex; flex-direction: column; gap: 4px; }
-      .field label { color: var(--muted); font-size: 0.75rem; }
-      .config-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-      .section { scroll-margin-top: 14px; }
-      .section.hidden { display: none; }
-      .pair-card { display:grid; grid-template-columns: 48px 1fr 1fr 110px 100px; gap:10px; align-items:end; padding:12px; margin:8px 0; border:1px solid rgba(69,183,255,.2); border-radius:10px; background:rgba(69,183,255,.04); }
-      .pair-badge { font-size:1.35rem; font-weight:bold; color:var(--primary); align-self:center; }
-      .pair-flow { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.78rem; }
-      .pair-dot { width:10px; height:10px; border-radius:50%; background:var(--success); box-shadow:0 0 8px var(--success); }
-      .broadcast { display:flex; align-items:center; gap:8px; color:var(--warning); padding:8px 0; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
-      .small { color: var(--muted); font-size: 0.8rem; }
-      @media (max-width: 800px) {
-        .stats { grid-template-columns: repeat(2, minmax(110px, 1fr)); }
-        .layout { grid-template-columns: 1fr; padding: 0 12px 12px; }
-        .config-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="topbar">
-      <h1>Vehicle Detector Fleet Dashboard</h1>
-      <div class="small" id="statusText">Connecting…</div>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LDC Fleet Dashboard</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121b2d;
+      --panel-2: #182540;
+      --text: #ebf3ff;
+      --muted: #9bb0d1;
+      --primary: #45b7ff;
+      --success: #23d18b;
+      --warning: #f5b841;
+      --danger: #ef5d56;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif;
+    }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; background: var(--panel);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .topbar h1 { margin: 0; font-size: 1.4rem; }
+    .stats { display: grid; grid-template-columns: repeat(5, minmax(110px,1fr)); gap: 14px; padding: 16px 22px; }
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 16px;
+    }
+    .card h3 { margin: 0 0 8px; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .big { font-size: 1.8rem; font-weight: bold; }
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; padding: 0 22px 22px; }
+    .sidebar, .main { display: flex; flex-direction: column; gap: 16px; }
+    .menu { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+    .menu button { text-align: left; background: transparent; color: var(--muted); border: 0; }
+    .menu button:hover, .menu button.active { background: rgba(69,183,255,.14); color: var(--text); }
+    .device-list { display: flex; flex-direction: column; gap: 10px; }
+    .device-item { background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; cursor: pointer; }
+    .device-item.active { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(69,183,255,0.4); }
+    .device-item .row { display: flex; justify-content: space-between; align-items: center; }
+    .pill { padding: 4px 8px; border-radius: 999px; font-size: 0.7rem; background: rgba(35,209,139,0.15); color: var(--success); }
+    .pill.offline { background: rgba(239,93,86,0.15); color: var(--danger); }
+    .panel { background: var(--panel); border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.08); }
+    .panel h2 { margin-top: 0; }
+    .grid2 { display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: 12px; }
+    .meta { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+    input, select, button {
+      border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0d162a; color: var(--text); padding: 8px 10px;
+    }
+    button { background: var(--primary); color: #06111b; font-weight: bold; cursor: pointer; }
+    .log { max-height: 260px; overflow: auto; white-space: pre-wrap; background: #091322; border-radius: 10px; padding: 10px; font-family: Consolas, monospace; font-size: 12px; }
+    .message-log { height: 320px; overflow: auto; background: #091322; border-radius: 10px; padding: 10px; font-family: Consolas, monospace; font-size: 12px; }
+    .message-line { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .message-line.in { color: #8ff4a2; }
+    .message-line.out { color: #79c0ff; }
+    .message-line.err { color: #ff7b7b; }
+    .message-line.sys { color: #ffd966; }
+    .message-meta { color: var(--muted); }
+    .config-section { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; margin-top: 14px; }
+    .config-section:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+    .config-grid { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 8px; align-items: end; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { color: var(--muted); font-size: 0.75rem; }
+    .config-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .section { scroll-margin-top: 14px; }
+    .section.hidden { display: none; }
+    .pair-card { display:grid; grid-template-columns: 48px 1fr 1fr 110px 100px; gap:10px; align-items:end; padding:12px; margin:8px 0; border:1px solid rgba(69,183,255,.2); border-radius:10px; background:rgba(69,183,255,.04); }
+    .pair-badge { font-size:1.35rem; font-weight:bold; color:var(--primary); align-self:center; }
+    .pair-flow { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:.78rem; }
+    .pair-dot { width:10px; height:10px; border-radius:50%; background:var(--success); box-shadow:0 0 8px var(--success); }
+    .broadcast { display:flex; align-items:center; gap:8px; color:var(--warning); padding:8px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+    .small { color: var(--muted); font-size: 0.8rem; }
+    /* merged activity + console */
+    .merged-console-activity {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .console-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .console-row select, .console-row input {
+      flex: 1 1 180px;
+    }
+    .activity-subsection {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 14px;
+      margin-top: 6px;
+    }
+    .activity-subsection h3 {
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+    @media (max-width: 800px) {
+      .stats { grid-template-columns: repeat(2, minmax(110px, 1fr)); }
+      .layout { grid-template-columns: 1fr; padding: 0 12px 12px; }
+      .config-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Vehicle Detector Fleet Dashboard</h1>
+    <div class="small" id="statusText">Connecting…</div>
+  </div>
 
-    <div class="stats" id="statsGrid"></div>
+  <div class="stats" id="statsGrid"></div>
 
-    <div class="layout">
-      <aside class="sidebar">
-        <div class="panel">
-          <h2>Workspace</h2>
-          <nav class="menu" aria-label="Dashboard sections">
-            <button data-section="ota">Firmware OTA</button>
-            <button class="active" data-section="overview">◉ Overview</button>
-            <button data-section="console">⌘ Command Console</button>
-            <button data-section="loop">⇄ Loop Pairs</button>
-            <button data-section="detector">◈ Detector &amp; Thresholds</button>
-            <button data-section="classification">▦ Vehicle Classification</button>
-            <button data-section="reporting">⚙ Reporting &amp; MQTT</button>
-            <button data-section="activity">▤ Activity &amp; Replies</button>
-          </nav>
-        </div>
-        <div class="panel">
-          <h2>Boards</h2>
-          <div id="deviceList" class="device-list"></div>
-        </div>
-      </aside>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="panel">
+        <h2>Workspace</h2>
+        <nav class="menu" aria-label="Dashboard sections">
+          <button class="active" data-section="overview">◉ Overview</button>
+          <button data-section="console">⌘ Console &amp; Activity</button>
+          <button data-section="loop">⇄ Loop Pairs</button>
+          <button data-section="detector">◈ Detector &amp; Thresholds</button>
+          <button data-section="classification">▦ Vehicle Classification</button>
+          <button data-section="reporting">⚙ Reporting &amp; MQTT</button>
+        </nav>
+      </div>
+      <div class="panel">
+        <h2>Boards</h2>
+        <div id="deviceList" class="device-list"></div>
+      </div>
+    </aside>
 
-      <main class="main">
-        <div class="panel section" data-section-content="overview">
-          <h2 id="selectedDeviceTitle">Board Overview</h2>
-          <div class="grid2">
-            <div>
-              <div class="meta"><span>Battery</span><strong id="batteryValue">—</strong></div>
-              <div class="meta"><span>Solar</span><strong id="solarValue">—</strong></div>
-              <div class="meta"><span>Signal</span><strong id="signalValue">—</strong></div>
-              <div class="meta"><span>Last Seen</span><strong id="lastSeenValue">—</strong></div>
-            </div>
-            <div>
-              <div class="meta"><span>Status</span><strong id="statusValue">—</strong></div>
-              <div class="meta"><span>Name</span><strong id="nameValue">—</strong></div>
-              <div class="meta"><span>Board ID</span><strong id="boardIdValue">—</strong></div>
-              <div class="meta"><span>Loop Pairs</span><strong id="loopPairsValue">—</strong></div>
-              <div class="meta"><span>Vehicle Class</span><strong id="classValue">—</strong></div>
-            </div>
+    <main class="main">
+      <div class="panel section" data-section-content="overview">
+        <h2 id="selectedDeviceTitle">Board Overview</h2>
+        <div class="grid2">
+          <div>
+            <div class="meta"><span>Battery</span><strong id="batteryValue">—</strong></div>
+            <div class="meta"><span>Solar</span><strong id="solarValue">—</strong></div>
+            <div class="meta"><span>Signal</span><strong id="signalValue">—</strong></div>
+            <div class="meta"><span>Last Seen</span><strong id="lastSeenValue">—</strong></div>
           </div>
-          <div class="controls" style="margin-top:14px;">
-            <input id="deviceNameInput" placeholder="Board friendly name" />
-            <button onclick="saveDeviceName()">Save Name</button>
-            <button onclick="refreshDevices()">Refresh</button>
-          </div>
-        </div>
-
-        <div class="panel section hidden" data-section-content="console">
-          <h2>Command Console</h2>
-          <div class="controls">
-            <select id="commandPreset">
-              <option value="GET_STATUS">GET_STATUS</option>
-              <option value="GET_CONFIG">GET_CONFIG</option>
-              <option value="GET_REPORT">GET_REPORT</option>
-              <option value="GET_SPEED_STATE">GET_SPEED_STATE</option>
-              <option value="GET_LOOP_GEOMETRY">GET_LOOP_GEOMETRY</option>
-              <option value="GET_CPU">GET_CPU</option>
-              <option value="GET_MQTT_ID">GET_MQTT_ID</option>
-              <option value="GET_MQTT_CFG">GET_MQTT_CFG</option>
-              <option value="GET_WIFI">GET_WIFI</option>
-              <option value="GET_SENSOR_LC">GET_SENSOR_LC</option>
-              <option value="GET_LOOP_CFG">GET_LOOP_CFG</option>
-              <option value="GET_TRAFFIC_RULES">GET_TRAFFIC_RULES</option>
-              <option value="GET_REPORT_CFG">GET_REPORT_CFG</option>
-              <option value="GET_DEFAULT_KMH">GET_DEFAULT_KMH</option>
-              <option value="GET_GPS_STATUS">GET_GPS_STATUS</option>
-              <option value="GET_POWER">GET_POWER</option>
-              <option value="GET_TIME">GET_TIME</option>
-              <option value="CALIBRATE">CALIBRATE</option>
-              <option value="RESET_STATS">RESET_STATS</option>
-            </select>
-            <button onclick="sendSelectedCommand()">Send Command</button>
-          </div>
-          <label class="broadcast"><input id="commandBroadcast" type="checkbox" /> Also send to all boards (<code>vehicles/commands</code>)</label>
-          <div class="small" id="commandTargetHint">Target: selected board only</div>
-          <div class="log" id="commandLog"></div>
-        </div>
-
-        <div class="panel section hidden" data-section-content="ota">
-          <h2>Firmware OTA over modem</h2>
-          <p class="small">Upload a PlatformIO <code>firmware.bin</code>. The dashboard calculates its MD5, hosts it for download, and sends the selected board an <code>OTA_UPDATE</code> command. Set <code>PUBLIC_BASE_URL</code> when this server is behind a proxy or uses a public hostname.</p>
-          <div class="controls">
-            <input id="firmwareFile" type="file" accept=".bin,application/octet-stream">
-            <button onclick="uploadFirmware()">Upload and start OTA</button>
-          </div>
-          <div class="small" id="firmwareStatus">No firmware uploaded.</div>
-          <div class="small" id="otaLiveStatus">OTA topic status: waiting</div>
-          <progress id="otaProgress" value="0" max="100" style="width:100%;margin-top:8px;"></progress>
-          <div class="log" id="firmwareLog"></div>
-        </div>
-
-        <div class="panel section hidden" data-section-content="config">
-          <h2>Board Configuration</h2>
-          <p class="small">Edit the selected board profile, save it in the dashboard, or send the matching commands to the ESP.</p>
-          <div class="config-section section" data-section-content="loop">
-            <h3>Loop Pairs</h3>
-            <div id="loopConfigRows"></div>
-          </div>
-          <div class="config-section section hidden" data-section-content="detector">
-            <h3>Detector and Thresholds</h3>
-            <div class="config-grid">
-              <div class="field"><label>Min event (ms)</label><input id="cfgMinEvent" type="number" step="1"></div>
-              <div class="field"><label>Max event (ms)</label><input id="cfgMaxEvent" type="number" step="1"></div>
-              <div class="field"><label>Enter threshold</label><input id="cfgEnterThresh" type="number" step="0.01"></div>
-              <div class="field"><label>Exit ratio</label><input id="cfgExitRatio" type="number" step="0.01"></div>
-              <div class="field"><label>Auto threshold</label><select id="cfgAutoThreshold"><option value="1">ON</option><option value="0">OFF</option></select></div>
-              <div class="field"><label>Enter sigma</label><input id="cfgEnterSigma" type="number" step="0.1"></div>
-              <div class="field"><label>Absolute sigma</label><input id="cfgAbsSigma" type="number" step="0.1"></div>
-              <div class="field"><label>Confirm samples</label><input id="cfgConfirmSamples" type="number" min="1" step="1" value="3"></div>
-              <div class="field"><label>Minimum samples</label><input id="cfgMinSamples" type="number" min="1" step="1" value="6"></div>
-              <div class="field"><label>Peak / baseline ratio</label><input id="cfgPeakRatio" type="number" min="0.01" step="0.01" value="1.8"></div>
-              <div class="field"><label>Enter hysteresis</label><input id="cfgEnterHyst" type="number" min="0.01" step="0.01" value="0.7"></div>
-              <div class="field"><label>Exit hysteresis</label><input id="cfgExitHyst" type="number" min="0.01" step="0.01" value="0.55"></div>
-            </div>
-          </div>
-          <div class="config-section section hidden" data-section-content="classification">
-            <h3>Vehicle Classification Lengths (m)</h3>
-            <div class="config-grid">
-              <div class="field"><label>Motor max</label><input id="cfgMotorMax" type="number" step="0.1"></div>
-              <div class="field"><label>Car max</label><input id="cfgCarMax" type="number" step="0.1"></div>
-              <div class="field"><label>Pickup max</label><input id="cfgPickupMax" type="number" step="0.1"></div>
-              <div class="field"><label>Van max</label><input id="cfgVanMax" type="number" step="0.1"></div>
-              <div class="field"><label>Bus max</label><input id="cfgBusMax" type="number" step="0.1"></div>
-              <div class="field"><label>Truck S max</label><input id="cfgTruckSMax" type="number" step="0.1"></div>
-              <div class="field"><label>Truck 2 max</label><input id="cfgTruck2Max" type="number" step="0.1"></div>
-              <div class="field"><label>Truck 3 max</label><input id="cfgTruck3Max" type="number" step="0.1"></div>
-              <div class="field"><label>Truck 4+ min</label><input id="cfgTruck4Min" type="number" step="0.1"></div>
-            </div>
-          </div>
-          <div class="config-section section hidden" data-section-content="reporting">
-            <h3>Reporting and MQTT</h3>
-            <div class="config-grid">
-              <div class="field"><label>Report interval (min)</label><input id="cfgReportInterval" type="number" min="0" step="1"></div>
-              <div class="field"><label>Auto report</label><select id="cfgReportEnabled"><option value="1">ON</option><option value="0">OFF</option></select></div>
-              <div class="field"><label>Clear on report</label><select id="cfgClearReport"><option value="1">YES</option><option value="0">NO</option></select></div>
-              <div class="field"><label>MQTT client ID</label><input id="cfgMqttId" type="text"></div>
-              <div class="field"><label>MQTT server</label><input id="cfgMqttServer" type="text"></div>
-              <div class="field"><label>MQTT port</label><input id="cfgMqttPort" type="number" step="1"></div>
-              <div class="field"><label>MQTT user</label><input id="cfgMqttUser" type="text"></div>
-              <div class="field"><label>MQTT password</label><input id="cfgMqttPass" type="password"></div>
-              <div class="field"><label>Cellular APN</label><input id="cfgMqttApn" type="text"></div>
-              <div class="field"><label>MQTT events topic</label><input id="cfgMqttEvents" type="text"></div>
-              <div class="field"><label>MQTT commands topic</label><input id="cfgMqttCommands" type="text"></div>
-              <div class="field"><label>MQTT responses topic</label><input id="cfgMqttResponses" type="text"></div>
-            </div>
-          </div>
-          <div class="config-actions">
-            <button onclick="saveBoardProfile()">Save Dashboard Profile</button>
-            <button onclick="sendBoardConfiguration()">Send Configuration to ESP</button>
-            <button onclick="loadBoardProfile()">Reload Selected Board</button>
+          <div>
+            <div class="meta"><span>Status</span><strong id="statusValue">—</strong></div>
+            <div class="meta"><span>Name</span><strong id="nameValue">—</strong></div>
+            <div class="meta"><span>Board ID</span><strong id="boardIdValue">—</strong></div>
+            <div class="meta"><span>Loop Pairs</span><strong id="loopPairsValue">—</strong></div>
+            <div class="meta"><span>Vehicle Class</span><strong id="classValue">—</strong></div>
           </div>
         </div>
+        <div class="controls" style="margin-top:14px;">
+          <input id="deviceNameInput" placeholder="Board friendly name" />
+          <button onclick="saveDeviceName()">Save Name</button>
+          <button onclick="refreshDevices()">Refresh</button>
+        </div>
+      </div>
 
-        <div class="panel section hidden" data-section-content="activity">
-          <h2>Command / Reply Log</h2>
+      <!-- MERGED: Command Console + Activity -->
+      <div class="panel section hidden" data-section-content="console">
+        <h2>Command Console &amp; Activity</h2>
+
+        <!-- Command console top -->
+        <div class="console-row">
+          <select id="commandPreset">
+            <option value="GET_STATUS">GET_STATUS</option>
+            <option value="GET_CONFIG">GET_CONFIG</option>
+            <option value="GET_REPORT">GET_REPORT</option>
+            <option value="GET_SPEED_STATE">GET_SPEED_STATE</option>
+            <option value="GET_LOOP_GEOMETRY">GET_LOOP_GEOMETRY</option>
+            <option value="GET_CPU">GET_CPU</option>
+            <option value="GET_MQTT_ID">GET_MQTT_ID</option>
+            <option value="GET_MQTT_CFG">GET_MQTT_CFG</option>
+            <option value="GET_WIFI">GET_WIFI</option>
+            <option value="GET_SENSOR_LC">GET_SENSOR_LC</option>
+            <option value="GET_LOOP_CFG">GET_LOOP_CFG</option>
+            <option value="GET_TRAFFIC_RULES">GET_TRAFFIC_RULES</option>
+            <option value="GET_REPORT_CFG">GET_REPORT_CFG</option>
+            <option value="GET_DEFAULT_KMH">GET_DEFAULT_KMH</option>
+            <option value="GET_GPS_STATUS">GET_GPS_STATUS</option>
+            <option value="GET_POWER">GET_POWER</option>
+            <option value="GET_TIME">GET_TIME</option>
+            <option value="CALIBRATE">CALIBRATE</option>
+            <option value="RESET_STATS">RESET_STATS</option>
+          </select>
+          <button onclick="sendSelectedCommand()">Send Command</button>
+        </div>
+        <label class="broadcast"><input id="commandBroadcast" type="checkbox" /> Also send to all boards (<code>vehicles/commands</code>)</label>
+        <div class="small" id="commandTargetHint">Target: selected board only</div>
+        <div class="log" id="commandLog"></div>
+
+        <!-- Activity subsections -->
+        <div class="activity-subsection">
+          <h3>Command / Reply Log</h3>
           <table>
             <thead>
               <tr><th>Time</th><th>Cmd</th><th>Command</th><th>Status</th><th>Reply</th></tr>
@@ -253,8 +204,8 @@
           </table>
         </div>
 
-        <div class="panel section hidden" data-section-content="activity">
-          <h2>Live MQTT Message Log</h2>
+        <div class="activity-subsection">
+          <h3>Live MQTT Message Log</h3>
           <div class="controls" style="margin-bottom:10px;">
             <select id="messageFilter" aria-label="Message direction filter">
               <option value="all">All messages</option>
@@ -270,8 +221,8 @@
           <div class="message-log" id="messageLog" role="log" aria-live="polite"></div>
         </div>
 
-        <div class="panel section hidden" data-section-content="activity">
-          <h2>Recent Events</h2>
+        <div class="activity-subsection">
+          <h3>Recent Events</h3>
           <table>
             <thead>
               <tr><th>Time</th><th>Type</th><th>Device</th><th>Details</th></tr>
@@ -279,8 +230,72 @@
             <tbody id="eventsTable"></tbody>
           </table>
         </div>
-      </main>
-    </div>
+      </div>
+
+      <div class="panel section hidden" data-section-content="config">
+        <h2>Board Configuration</h2>
+        <p class="small">Edit the selected board profile, save it in the dashboard, or send the matching commands to the ESP.</p>
+        <div class="config-section section" data-section-content="loop">
+          <h3>Loop Pairs</h3>
+          <div id="loopConfigRows"></div>
+        </div>
+        <div class="config-section section hidden" data-section-content="detector">
+          <h3>Detector and Thresholds</h3>
+          <div class="config-grid">
+            <div class="field"><label>Min event (ms)</label><input id="cfgMinEvent" type="number" step="1"></div>
+            <div class="field"><label>Max event (ms)</label><input id="cfgMaxEvent" type="number" step="1"></div>
+            <div class="field"><label>Enter threshold</label><input id="cfgEnterThresh" type="number" step="0.01"></div>
+            <div class="field"><label>Exit ratio</label><input id="cfgExitRatio" type="number" step="0.01"></div>
+            <div class="field"><label>Auto threshold</label><select id="cfgAutoThreshold"><option value="1">ON</option><option value="0">OFF</option></select></div>
+            <div class="field"><label>Enter sigma</label><input id="cfgEnterSigma" type="number" step="0.1"></div>
+            <div class="field"><label>Absolute sigma</label><input id="cfgAbsSigma" type="number" step="0.1"></div>
+            <div class="field"><label>Confirm samples</label><input id="cfgConfirmSamples" type="number" min="1" step="1" value="3"></div>
+            <div class="field"><label>Minimum samples</label><input id="cfgMinSamples" type="number" min="1" step="1" value="6"></div>
+            <div class="field"><label>Peak / baseline ratio</label><input id="cfgPeakRatio" type="number" min="0.01" step="0.01" value="1.8"></div>
+            <div class="field"><label>Enter hysteresis</label><input id="cfgEnterHyst" type="number" min="0.01" step="0.01" value="0.7"></div>
+            <div class="field"><label>Exit hysteresis</label><input id="cfgExitHyst" type="number" min="0.01" step="0.01" value="0.55"></div>
+          </div>
+        </div>
+        <div class="config-section section hidden" data-section-content="classification">
+          <h3>Vehicle Classification Lengths (m)</h3>
+          <div class="config-grid">
+            <div class="field"><label>Motor max</label><input id="cfgMotorMax" type="number" step="0.1"></div>
+            <div class="field"><label>Car max</label><input id="cfgCarMax" type="number" step="0.1"></div>
+            <div class="field"><label>Pickup max</label><input id="cfgPickupMax" type="number" step="0.1"></div>
+            <div class="field"><label>Van max</label><input id="cfgVanMax" type="number" step="0.1"></div>
+            <div class="field"><label>Bus max</label><input id="cfgBusMax" type="number" step="0.1"></div>
+            <div class="field"><label>Truck S max</label><input id="cfgTruckSMax" type="number" step="0.1"></div>
+            <div class="field"><label>Truck 2 max</label><input id="cfgTruck2Max" type="number" step="0.1"></div>
+            <div class="field"><label>Truck 3 max</label><input id="cfgTruck3Max" type="number" step="0.1"></div>
+            <div class="field"><label>Truck 4+ min</label><input id="cfgTruck4Min" type="number" step="0.1"></div>
+          </div>
+        </div>
+        <div class="config-section section hidden" data-section-content="reporting">
+          <h3>Reporting and MQTT</h3>
+          <div class="config-grid">
+            <div class="field"><label>Report interval (min)</label><input id="cfgReportInterval" type="number" min="0" step="1"></div>
+            <div class="field"><label>Auto report</label><select id="cfgReportEnabled"><option value="1">ON</option><option value="0">OFF</option></select></div>
+            <div class="field"><label>Clear on report</label><select id="cfgClearReport"><option value="1">YES</option><option value="0">NO</option></select></div>
+            <div class="field"><label>MQTT client ID</label><input id="cfgMqttId" type="text"></div>
+            <div class="field"><label>MQTT server</label><input id="cfgMqttServer" type="text"></div>
+            <div class="field"><label>MQTT port</label><input id="cfgMqttPort" type="number" step="1"></div>
+            <div class="field"><label>MQTT user</label><input id="cfgMqttUser" type="text"></div>
+            <div class="field"><label>MQTT password</label><input id="cfgMqttPass" type="password"></div>
+            <div class="field"><label>Cellular APN</label><input id="cfgMqttApn" type="text"></div>
+            <div class="field"><label>MQTT events topic</label><input id="cfgMqttEvents" type="text"></div>
+            <div class="field"><label>MQTT commands topic</label><input id="cfgMqttCommands" type="text"></div>
+            <div class="field"><label>MQTT responses topic</label><input id="cfgMqttResponses" type="text"></div>
+          </div>
+        </div>
+        <div class="config-actions">
+          <button onclick="saveBoardProfile()">Save Dashboard Profile</button>
+          <button onclick="sendBoardConfiguration()">Send Configuration to ESP</button>
+          <button onclick="loadBoardProfile()">Reload Selected Board</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
 
     <script>
       const state = { devices: [], selectedId: null, ws: null, messages: [] };
@@ -351,37 +366,49 @@
           item.className = 'device-item' + (state.selectedId === d.id ? ' active' : '');
           const lastReply = d.lastReply ? d.lastReply.replace(/^RSP\|[^|]+\|/, '').slice(0, 60) : '—';
           const pending = (d.commandLog || []).filter((c) => c.status === 'pending').length;
+          const isOffline = d.status === 'offline';
           item.innerHTML = `
             <div class="row"><strong>${d.name || d.id}</strong><span class="pill ${d.status === 'online' ? '' : 'offline'}">${d.status || 'offline'}</span></div>
             <div class="small">ID: ${d.id}</div>
             <div class="small">Battery: ${d.battery ?? '—'} V</div>
             <div class="small">Last reply: ${lastReply}</div>
             <div class="small">Pending: ${pending}</div>
-            ${d.status === 'online' ? '' : `<button class="delete-board" data-board-id="${escapeHtml(d.id)}" style="margin-top:8px;background:#b42318;">Delete offline board</button>`}
+            ${isOffline ? `<div class="small" style="margin-top:8px;"><button class="delete-btn" data-device-id="${d.id}" style="background:var(--danger); color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Delete Device</button></div>` : ''}
           `;
-          item.onclick = () => {
+          // Handle click on device item (but not on delete button)
+          item.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) return;
             state.selectedId = d.id;
             renderDevices();
             renderSelectedDevice();
-          };
-          const deleteButton = item.querySelector('.delete-board');
-          if (deleteButton) {
-            deleteButton.onclick = async (event) => {
-              event.stopPropagation();
-              if (!confirm(`Delete offline board ${d.id}?`)) return;
-              const response = await fetch(`/api/device/${encodeURIComponent(d.id)}`, { method: 'DELETE' });
-              const result = await response.json();
-              if (!response.ok) {
-                setLog(result.message || result.error || 'Unable to delete board');
-                return;
+          });
+          // Handle delete button click
+          const deleteBtn = item.querySelector('.delete-btn');
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (confirm(`Delete offline device "${d.name || d.id}" (ID: ${d.id})? This cannot be undone.`)) {
+                deleteDevice(d.id);
               }
-              if (state.selectedId === d.id) state.selectedId = null;
-              refreshDevices();
-            };
+            });
           }
           deviceList.appendChild(item);
         });
         if (!state.selectedId && state.devices.length) state.selectedId = state.devices[0].id;
+      }
+
+      async function deleteDevice(deviceId) {
+        try {
+          const res = await fetch(`/api/device/${encodeURIComponent(deviceId)}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error('Failed to delete');
+          // If deleted device was selected, clear selection
+          if (state.selectedId === deviceId) {
+            state.selectedId = null;
+          }
+          await refreshDevices();
+        } catch (err) {
+          alert('Error deleting device: ' + err.message);
+        }
       }
 
       function renderSelectedDevice() {
@@ -397,16 +424,12 @@
         const loopPairs = document.getElementById('loopPairsValue');
         const classField = document.getElementById('classValue');
         const input = document.getElementById('deviceNameInput');
-        const otaStatus = document.getElementById('otaLiveStatus');
-        const otaProgress = document.getElementById('otaProgress');
 
         if (!d) {
           title.textContent = 'Board Overview';
           battery.textContent = '—'; solar.textContent = '—'; signal.textContent = '—'; lastSeen.textContent = '—';
           status.textContent = '—'; name.textContent = '—'; boardId.textContent = '—'; loopPairs.textContent = '—'; classField.textContent = '—';
           input.value = '';
-          otaStatus.textContent = 'OTA topic status: waiting';
-          otaProgress.value = 0;
           renderCommandReplyTable([]);
           loadConfigForm({});
           return;
@@ -423,29 +446,16 @@
         input.value = d.name || d.id;
         loopPairs.textContent = d.loopConfig ? JSON.stringify(d.loopConfig) : '—';
         classField.textContent = d.classification ? JSON.stringify(d.classification) : '—';
-        if (d.ota) {
-          const ota = d.ota;
-          const detail = ota.state === 'progress' && ota.received != null
-            ? ` ${ota.percent ?? 0}% (${ota.received}/${ota.total} bytes)`
-            : (ota.raw ? ` ${ota.raw}` : '');
-          otaStatus.textContent = `OTA topic status: ${ota.state || 'unknown'}${detail}`;
-          otaProgress.value = Number(ota.percent || (ota.state === 'success' ? 100 : 0));
-        }
         renderCommandReplyTable(d.commandLog || []);
         loadConfigForm(d.profile || {});
       }
 
       const configDefaults = {
-        loopPairs: [
-          { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 0, sensor2: 0, ch2: 1 },
-          { enabled: false, distance_m: 0.4, sensor1: 0, ch1: 2, sensor2: 0, ch2: 3 },
-          { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 0, sensor2: 1, ch2: 1 },
-          { enabled: false, distance_m: 0.4, sensor1: 1, ch1: 2, sensor2: 1, ch2: 3 }
-        ],
+        loopPairs: [{ enabled: true, distance_m: 2.2, sensor1: 0, ch1: 0, sensor2: 1, ch2: 0 }],
         detector: { min_event_ms: 25, max_event_ms: 5000, enter_thresh: 1.5, exit_ratio: 0.7, auto_threshold: true, enter_sigma: 4, abs_sigma: 6, confirm_samples: 3, min_samples: 6, peak_ratio: 1.8, enter_hysteresis: 0.7, exit_hysteresis: 0.55 },
         classification: { motor_max_len: 1.2, car_max_len: 3.8, pickup_max_len: 5.2, van_max_len: 6.5, bus_max_len: 10.5, truck_s_max_len: 12, truck_2_max_len: 15, truck_3_max_len: 18, truck_4_plus_min_len: 20 },
         report: { enabled: true, interval_min: 1, clear_on_report: false },
-        mqtt: { id: '', server: '', port: 1011, user: '', pass: '', apn: '', topic_events: 'vehicles/events', topic_commands: 'vehicles/commands', topic_responses: 'vehicles/command_responses' }
+        mqtt: { id: '', server: '', port: 1883, user: '', pass: '', apn: '', topic_events: 'vehicles/events', topic_commands: 'vehicles/commands', topic_responses: 'vehicles/command_responses' }
       };
 
       function configValue(value, fallback) { return value ?? fallback; }
@@ -646,42 +656,6 @@
         }).then((r) => r.json()).then((d) => {
           setLog(JSON.stringify(d, null, 2));
         });
-      }
-
-      async function uploadFirmware() {
-        const deviceId = state.selectedId;
-        const file = document.getElementById('firmwareFile').files[0];
-        const status = document.getElementById('firmwareStatus');
-        if (!deviceId) { status.textContent = 'Select a board first.'; return; }
-        if (!file || !/\.bin$/i.test(file.name)) { status.textContent = 'Select a firmware.bin file.'; return; }
-        if (!confirm('Upload this firmware and restart the selected board after validation?')) return;
-        status.textContent = 'Uploading firmware...';
-        try {
-          const upload = await fetch('/api/firmware', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/octet-stream', 'X-Filename': file.name },
-            body: file
-          });
-          const uploadText = await upload.text();
-          let artifact;
-          try { artifact = JSON.parse(uploadText); }
-          catch (_) {
-            throw new Error(`HTTP ${upload.status}: dashboard returned HTML instead of JSON. Restart the mqtt-dashboard server and try again.`);
-          }
-          if (!upload.ok) throw new Error(artifact.error || `upload_failed_http_${upload.status}`);
-          status.textContent = `Uploaded ${artifact.fileName} (${artifact.bytes} bytes), MD5 ${artifact.md5}`;
-          const command = `OTA_UPDATE|${artifact.url}|${artifact.md5}`;
-          const result = await fetch(`/api/device/${encodeURIComponent(deviceId)}/command`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ command, broadcast: false })
-          });
-          const sent = await result.json();
-          if (!result.ok) throw new Error(sent.error || 'command_failed');
-          document.getElementById('firmwareLog').textContent = JSON.stringify(sent, null, 2);
-        } catch (err) {
-          status.textContent = `OTA failed: ${err.message}`;
-        }
       }
 
       function selectSection(section) {
