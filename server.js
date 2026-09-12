@@ -13,6 +13,8 @@ const {
   parseTrafficReport,
   parseEventMessage,
 } = require('./parsers.js');
+const crypto = require('crypto');
+const multer = require('multer');
 
 const app = express();
 const server = http.createServer(app);
@@ -22,6 +24,7 @@ const mqttPort = process.env.MQTT_PORT || 1010;
 const httpPort = process.env.PORT || 3000;
 const dataDir = path.join(__dirname, 'data');
 const devicesFile = path.join(dataDir, 'devices.json');
+const firmwareDir = path.join(dataDir, 'firmware');
 
 const state = {
   devices: [],
@@ -76,6 +79,7 @@ function defaultProfile() {
 
 function ensureDataDir() {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(firmwareDir)) fs.mkdirSync(firmwareDir, { recursive: true });
   if (!fs.existsSync(devicesFile)) {
     fs.writeFileSync(devicesFile, JSON.stringify({ devices: [] }, null, 2));
   }
@@ -600,6 +604,138 @@ app.get('/api/analytics', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mqttPort, httpPort, boards: state.devices.length });
+});
+
+// --- OTA Firmware endpoints ---
+
+// List available firmware files
+app.get('/api/firmware', (req, res) => {
+  try {
+    ensureDataDir();
+    if (!fs.existsSync(firmwareDir)) return res.json({ files: [] });
+    const files = fs.readdirSync(firmwareDir)
+      .filter(f => f.endsWith('.bin'))
+      .map(f => {
+        const stats = fs.statSync(path.join(firmwareDir, f));
+        return {
+          name: f,
+          size: stats.size,
+          modified: stats.mtime.toISOString()
+        };
+      });
+    res.json({ files });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Upload firmware file
+const upload = multer({ dest: firmwareDir, limits: { fileSize: 3 * 1024 * 1024 } });
+
+app.post('/api/firmware/upload', upload.single('firmware'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    if (!req.file.originalname.endsWith('.bin')) {
+      // Remove non-.bin file
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: 'Only .bin files are allowed' });
+    }
+    // Rename to original name if needed
+    const targetPath = path.join(firmwareDir, req.file.originalname);
+    if (req.file.path !== targetPath) {
+      if (fs.existsSync(targetPath)) fs.unlinkSync(targetPath);
+      fs.renameSync(req.file.path, targetPath);
+    }
+    // Compute MD5
+    const fileBuffer = fs.readFileSync(targetPath);
+    const md5Hash = crypto.createHash('md5').update(fileBuffer).digest('hex');
+    
+    res.json({ 
+      ok: true, 
+      filename: req.file.originalname, 
+      size: fileBuffer.length,
+      md5: md5Hash,
+      url: `/firmware/${req.file.originalname}`
+    });
+  } catch (err) {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Serve firmware files (HTTP for board download)
+app.get('/firmware/:filename', (req, res) => {
+  const filename = req.params.filename;
+  if (!filename.endsWith('.bin')) {
+    return res.status(400).send('Only .bin files allowed');
+  }
+  const filepath = path.join(firmwareDir, filename);
+  if (!fs.existsSync(filepath)) {
+    return res.status(404).send('Firmware not found');
+  }
+  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader('Content-Length', fs.statSync(filepath).size);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.sendFile(filepath);
+});
+
+// Delete firmware file
+app.delete('/api/firmware/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    if (!filename.endsWith('.bin')) {
+      return res.status(400).json({ error: 'Only .bin files allowed' });
+    }
+    const filepath = path.join(firmwareDir, filename);
+    if (!fs.existsSync(filepath)) {
+      return res.status(404).json({ error: 'Firmware not found' });
+    }
+    fs.unlinkSync(filepath);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// OTA Update command
+app.post('/api/device/:id/ota', (req, res) => {
+  const d = findDevice(req.params.id);
+  if (!d) return res.status(404).json({ error: 'not_found' });
+  
+  const { firmwareUrl, md5Hash } = req.body;
+  if (!firmwareUrl) return res.status(400).json({ error: 'firmwareUrl required' });
+  
+  // Build full URL for locally hosted files
+  let fullUrl = firmwareUrl;
+  if (firmwareUrl.startsWith('/firmware/') || firmwareUrl.startsWith('firmware/')) {
+    const filename = firmwareUrl.replace(/^\/firmware\//, '').replace(/^firmware\//, '');
+    // Use http (board only speaks HTTP) with the host the browser sees
+    const host = req.get('host') || `localhost:${httpPort}`;
+    fullUrl = `http://${host}/firmware/${filename}`;
+  }
+  
+  // Build OTA command per protocol
+  const cmd = `OTA_UPDATE|${fullUrl}|${md5Hash || ''}`;
+  const cmdId = String(++state.cmdCounter);
+  const envelope = `CMD|${cmdId}|${cmd}`;
+  const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`];
+  
+  const client = getCommandClient();
+  topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
+  
+  state.pendingCommands.set(cmdId, {
+    cmdId,
+    boardId: d.id,
+    command: cmd,
+    broadcast: false,
+    topics,
+    ts: new Date().toISOString(),
+    status: 'pending'
+  });
+  
+  res.json({ ok: true, cmdId, topics, command: cmd, firmwareUrl: fullUrl, md5Hash });
 });
 
 wsServer.on('connection', (socket) => {

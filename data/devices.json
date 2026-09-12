@@ -1,108 +1,6 @@
 {
   "devices": [
     {
-      "id": "118232",
-      "name": "Board-8232",
-      "status": "offline",
-      "lastSeen": "2026-09-07T07:41:47.500Z",
-      "power": {
-        "battery": 0,
-        "solar": 11.16,
-        "low": true
-      },
-      "network": {
-        "signal": 0
-      },
-      "loopConfig": {},
-      "classification": {},
-      "profile": {
-        "name": "New Board",
-        "loopPairs": [
-          {
-            "enabled": true,
-            "distance_m": 2.2,
-            "sensor1": 0,
-            "ch1": 0,
-            "sensor2": 1,
-            "ch2": 0
-          },
-          {
-            "enabled": false,
-            "distance_m": 2.4,
-            "sensor1": 0,
-            "ch1": 1,
-            "sensor2": 1,
-            "ch2": 1
-          }
-        ],
-        "detector": {
-          "min_event_ms": 25,
-          "max_event_ms": 5000,
-          "enter_thresh": 1.5,
-          "exit_ratio": 0.7,
-          "auto_threshold": true,
-          "enter_sigma": 4,
-          "abs_sigma": 6
-        },
-        "classification": {
-          "motor_max_len": 1.2,
-          "car_max_len": 3.8,
-          "pickup_max_len": 5.2,
-          "van_max_len": 6.5,
-          "bus_max_len": 10.5,
-          "truck_s_max_len": 12,
-          "truck_2_max_len": 15,
-          "truck_3_max_len": 18,
-          "truck_4_plus_min_len": 20
-        },
-        "report": {
-          "enabled": true,
-          "interval_min": 1,
-          "clear_on_report": false
-        }
-      },
-      "stats": {},
-      "events": [],
-      "trafficReports": [],
-      "history": [
-        {
-          "ts": "2026-09-07T07:41:47.492Z",
-          "message": "MQTT_ID|118232",
-          "type": "identity"
-        },
-        {
-          "ts": "2026-09-07T07:41:47.498Z",
-          "message": "MQTT_ID|118232",
-          "type": "identity"
-        },
-        {
-          "ts": "2026-09-07T07:41:47.499Z",
-          "message": "POWER|bat:0.00|sol:11.16|low:1",
-          "type": "power"
-        },
-        {
-          "ts": "2026-09-07T07:41:47.500Z",
-          "message": "BATTERY_LOW|bat:0.00|min:9.00",
-          "type": "battery"
-        }
-      ],
-      "everConnected": true,
-      "commandLog": [
-        {
-          "cmdId": "2",
-          "boardId": "118232",
-          "command": "GET_CONFIG",
-          "broadcast": false,
-          "topics": [
-            "vehicles/118232/commands"
-          ],
-          "ts": "2026-09-12T07:01:59.644Z",
-          "status": "timeout",
-          "replyTs": "2026-09-12T07:02:38.820Z"
-        }
-      ]
-    },
-    {
       "id": "15",
       "name": "Board-15",
       "status": "offline",
@@ -1904,6 +1802,18 @@
           "ts": "2026-09-07T10:06:27.007Z",
           "status": "timeout",
           "replyTs": "2026-09-07T10:07:03.540Z"
+        },
+        {
+          "cmdId": "1",
+          "boardId": "15",
+          "command": "OTA_UPDATE|http://localhost:3000/firmware/firmware.bin|be2abb4b9130432b94690fb7908d9c32",
+          "broadcast": false,
+          "topics": [
+            "vehicles/15/commands"
+          ],
+          "ts": "2026-09-12T09:03:44.376Z",
+          "status": "timeout",
+          "replyTs": "2026-09-12T09:04:22.601Z"
         }
       ],
       "lastReply": "RSP|12|TRAFFIC_REPORT|dur_s:22|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
@@ -1926,10 +1836,10 @@
       "id": "16",
       "name": "Board-16",
       "status": "offline",
-      "lastSeen": "2026-09-12T07:43:25.408Z",
+      "lastSeen": "2026-09-12T09:04:15.817Z",
       "power": {
         "battery": 0,
-        "solar": 10.96,
+        "solar": 11.08,
         "low": true
       },
       "network": {
@@ -1985,10 +1895,10 @@
       },
       "stats": {
         "deviceId": "16",
-        "raw": "TRAFFIC_REPORT|ts:2026-09-12T07:33:17+0330|dur_s:2400|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
-        "ts": "2026-09-12T07:33:17+0330",
+        "raw": "TRAFFIC_REPORT|ts:2026-09-12T09:03:45+0330|dur_s:1017|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+        "ts": "2026-09-12T09:03:45+0330",
         "type": "traffic-report",
-        "duration_s": 2400,
+        "duration_s": 1017,
         "total": 0,
         "avg_speed": 0,
         "speed_viol": 0,
@@ -2091,6 +2001,556 @@
         },
         {
           "ts": "2026-09-12T07:33:17+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T07:53:17+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T08:13:17+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T08:33:17+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:19:43+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:20:43+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:21:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:22:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:23:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T09:00:45+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T09:02:45+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T09:03:45+0330",
           "total": 0,
           "avg_speed": 0,
           "speed_viol": 0,
@@ -2245,6 +2705,226 @@
           "ts": "2026-09-12T07:43:25.408Z",
           "message": "POWER|bat:0.00|sol:10.96|low:1",
           "type": "power"
+        },
+        {
+          "ts": "2026-09-12T07:48:25.494Z",
+          "message": "POWER|bat:0.00|sol:11.14|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T07:52:03.575Z",
+          "message": "RSP|1|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T07:53:20.603Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T07:53:17+0330|dur_s:3600|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T07:53:25.365Z",
+          "message": "POWER|bat:0.00|sol:11.15|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T07:58:25.452Z",
+          "message": "POWER|bat:0.00|sol:11.06|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:03:25.393Z",
+          "message": "POWER|bat:0.00|sol:11.14|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:08:25.475Z",
+          "message": "POWER|bat:0.00|sol:11.07|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:13:20.721Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T08:13:17+0330|dur_s:4800|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T08:13:25.386Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:18:25.522Z",
+          "message": "POWER|bat:0.00|sol:11.15|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:23:25.542Z",
+          "message": "POWER|bat:0.00|sol:11.15|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:28:25.564Z",
+          "message": "POWER|bat:0.00|sol:11.15|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:33:20.450Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T08:33:17+0330|dur_s:6000|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T08:33:25.412Z",
+          "message": "POWER|bat:0.00|sol:11.15|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:38:25.419Z",
+          "message": "POWER|bat:0.00|sol:11.11|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:43:25.424Z",
+          "message": "POWER|bat:0.00|sol:11.10|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:46:59.170Z",
+          "message": "MQTT_ID|16",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T08:46:59.300Z",
+          "message": "MQTT_ID|16",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T08:46:59.398Z",
+          "message": "POWER|bat:0.00|sol:11.18|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:46:59.660Z",
+          "message": "BATTERY_LOW|bat:0.00|min:9.00",
+          "type": "battery"
+        },
+        {
+          "ts": "2026-09-12T08:49:41.774Z",
+          "message": "RSP|2|CONFIG_ACK|idx:0|dual:1|dist:2.20|s1:0|c1:0|s2:1|c2:0|a:S1C0|b:S2C0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:42.383Z",
+          "message": "RSP|3|CONFIG_ACK|idx:1|dual:0|dist:2.40|s1:0|c1:1|s2:1|c2:1|a:S1C1|b:S2C1",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:43.084Z",
+          "message": "RSP|4|CONFIG_ACK|idx:2|dual:1|dist:2.20|s1:0|c1:0|s2:1|c2:0|a:S1C0|b:S2C0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:43.883Z",
+          "message": "RSP|5|CONFIG_ACK|idx:3|dual:1|dist:2.20|s1:0|c1:0|s2:1|c2:0|a:S1C0|b:S2C0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:44.546Z",
+          "message": "RSP|6|THRESHOLD_ACK",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:45.314Z",
+          "message": "RSP|7|THRESHOLD_ACK",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:45.846Z",
+          "message": "RSP|8|AUTO_THRESH_ACK",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:46.654Z",
+          "message": "RSP|9|DETECTOR_ACK",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:46.849Z",
+          "message": "RSP|10|EVENT_RANGE_ACK",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:46.954Z",
+          "message": "RSP|11|CLASSIFY_ACK",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:47.183Z",
+          "message": "RSP|12|REPORT_INTERVAL_ACK|1",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:47.364Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:19:43+0330|dur_s:175|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T08:49:47.585Z",
+          "message": "RSP|13|REPORT_ENABLE_ACK|1",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:47.765Z",
+          "message": "RSP|14|REPORT_CLEAR_ACK|0",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:49:47.942Z",
+          "message": "RSP|15|MQTT_CFG_FULL_ACK|saved|restart_recommended",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T08:50:45.554Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:20:43+0330|dur_s:235|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T08:51:46.542Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:21:44+0330|dur_s:296|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T08:51:55.512Z",
+          "message": "POWER|bat:0.00|sol:11.08|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T08:52:46.555Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:22:44+0330|dur_s:356|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T08:53:46.637Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:23:44+0330|dur_s:416|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:00:47.654Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T09:00:45+0330|dur_s:837|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:02:47.551Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T09:02:45+0330|dur_s:957|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:03:47.561Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T09:03:45+0330|dur_s:1017|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:04:15.817Z",
+          "message": "RSP|2|OTA_ACCEPTED",
+          "type": "raw"
         }
       ],
       "everConnected": true,
@@ -2274,9 +2954,763 @@
           "status": "replied",
           "replyTs": "2026-09-12T07:02:09.428Z",
           "replyBody": "RSP|3|CONFIG|enter:0.000800|abs:0.000300|exit_ratio:0.25|hyst:5|min_ms:20|max_ms:5000|motor:2.4|car:4.0|pickup:5.0|van:6.5|bus:11.0|truckS:8.0|truck2:10.5|truck3:14.0|truck4min:14.0|prom:0.35|axle_ms:80.0|confirm:3|min_samples:6|peak_ratio:1.80|enter_hyst:0.70|exit_hyst:0.55|auto:1|enter_sigma:5.00|abs_sigma:2.50|dual:1|dist:0.4|s1:0|c1:0|s2:1|c2:0|default_kmh:90.0|rise_short:45.0|rise_mid:160.0|rise_long:300.0|energy_low:0.000010|energy_mid:0.000080|energy_high:0.000200|crest_spiky:2.80|crest_broad:1.60|s"
+        },
+        {
+          "cmdId": "1",
+          "boardId": "16",
+          "command": "GET_STATUS",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T07:52:02.889Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T07:52:03.575Z",
+          "replyBody": "RSP|1|STATUS|S1C0:0|S1C1:0|S1C2:0|S1C3:0|S2C0:0|S2C1:0|S2C2:0|S2C3:0"
+        },
+        {
+          "cmdId": "2",
+          "boardId": "16",
+          "command": "CONFIG_SET|0|1|2.2|0|0|1|0",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.742Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:41.774Z",
+          "replyBody": "RSP|2|CONFIG_ACK|idx:0|dual:1|dist:2.20|s1:0|c1:0|s2:1|c2:0|a:S1C0|b:S2C0"
+        },
+        {
+          "cmdId": "3",
+          "boardId": "16",
+          "command": "CONFIG_SET|1|0|2.4|0|1|1|1",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.745Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:42.383Z",
+          "replyBody": "RSP|3|CONFIG_ACK|idx:1|dual:0|dist:2.40|s1:0|c1:1|s2:1|c2:1|a:S1C1|b:S2C1"
+        },
+        {
+          "cmdId": "4",
+          "boardId": "16",
+          "command": "CONFIG_SET|2|1|2.2|0|0|1|0",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.745Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:43.084Z",
+          "replyBody": "RSP|4|CONFIG_ACK|idx:2|dual:1|dist:2.20|s1:0|c1:0|s2:1|c2:0|a:S1C0|b:S2C0"
+        },
+        {
+          "cmdId": "5",
+          "boardId": "16",
+          "command": "CONFIG_SET|3|1|2.2|0|0|1|0",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.746Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:43.883Z",
+          "replyBody": "RSP|5|CONFIG_ACK|idx:3|dual:1|dist:2.20|s1:0|c1:0|s2:1|c2:0|a:S1C0|b:S2C0"
+        },
+        {
+          "cmdId": "6",
+          "boardId": "16",
+          "command": "SET_THRESHOLD|enter|1.5",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.746Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:44.546Z",
+          "replyBody": "RSP|6|THRESHOLD_ACK"
+        },
+        {
+          "cmdId": "7",
+          "boardId": "16",
+          "command": "SET_THRESHOLD|exit_ratio|0.7",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.746Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:45.314Z",
+          "replyBody": "RSP|7|THRESHOLD_ACK"
+        },
+        {
+          "cmdId": "8",
+          "boardId": "16",
+          "command": "SET_AUTO_THRESH|1|4|6",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.747Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:45.846Z",
+          "replyBody": "RSP|8|AUTO_THRESH_ACK"
+        },
+        {
+          "cmdId": "9",
+          "boardId": "16",
+          "command": "SET_DETECTOR|3|6|1.8|0.7|0.55",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.747Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:46.654Z",
+          "replyBody": "RSP|9|DETECTOR_ACK"
+        },
+        {
+          "cmdId": "10",
+          "boardId": "16",
+          "command": "SET_EVENT_RANGE|25|5000",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.749Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:46.849Z",
+          "replyBody": "RSP|10|EVENT_RANGE_ACK"
+        },
+        {
+          "cmdId": "11",
+          "boardId": "16",
+          "command": "SET_CLASSIFY|1.2|3.8|5.2|6.5|10.5|12|15|18|20",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.749Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:46.954Z",
+          "replyBody": "RSP|11|CLASSIFY_ACK"
+        },
+        {
+          "cmdId": "12",
+          "boardId": "16",
+          "command": "SET_REPORT_INTERVAL|1",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.749Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:47.183Z",
+          "replyBody": "RSP|12|REPORT_INTERVAL_ACK|1"
+        },
+        {
+          "cmdId": "13",
+          "boardId": "16",
+          "command": "SET_REPORT_ENABLE|1",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.750Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:47.585Z",
+          "replyBody": "RSP|13|REPORT_ENABLE_ACK|1"
+        },
+        {
+          "cmdId": "14",
+          "boardId": "16",
+          "command": "SET_REPORT_CLEAR|0",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.750Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:47.765Z",
+          "replyBody": "RSP|14|REPORT_CLEAR_ACK|0"
+        },
+        {
+          "cmdId": "15",
+          "boardId": "16",
+          "command": "SET_MQTT_FULL|||1883|0.0.0.0||||vehicles/events|vehicles/commands|vehicles/command_responses",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T08:49:40.750Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T08:49:47.942Z",
+          "replyBody": "RSP|15|MQTT_CFG_FULL_ACK|saved|restart_recommended"
+        },
+        {
+          "cmdId": "2",
+          "boardId": "16",
+          "command": "OTA_UPDATE|http://localhost:3000/firmware/firmware.bin|be2abb4b9130432b94690fb7908d9c32",
+          "broadcast": false,
+          "topics": [
+            "vehicles/16/commands"
+          ],
+          "ts": "2026-09-12T09:04:14.762Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T09:04:15.817Z",
+          "replyBody": "RSP|2|OTA_ACCEPTED"
         }
       ],
-      "lastReply": "RSP|3|CONFIG|enter:0.000800|abs:0.000300|exit_ratio:0.25|hyst:5|min_ms:20|max_ms:5000|motor:2.4|car:4.0|pickup:5.0|van:6.5|bus:11.0|truckS:8.0|truck2:10.5|truck3:14.0|truck4min:14.0|prom:0.35|axle_ms:80.0|confirm:3|min_samples:6|peak_ratio:1.80|enter_hyst:0.70|exit_hyst:0.55|auto:1|enter_sigma:5.00|abs_sigma:2.50|dual:1|dist:0.4|s1:0|c1:0|s2:1|c2:0|default_kmh:90.0|rise_short:45.0|rise_mid:160.0|rise_long:300.0|energy_low:0.000010|energy_mid:0.000080|energy_high:0.000200|crest_spiky:2.80|crest_broad:1.60|s"
+      "lastReply": "RSP|2|OTA_ACCEPTED"
+    },
+    {
+      "id": "122",
+      "name": "Board-122",
+      "status": "online",
+      "lastSeen": "2026-09-12T09:14:46.405Z",
+      "power": {
+        "battery": 0,
+        "solar": 11.02,
+        "low": true
+      },
+      "network": {
+        "signal": 0
+      },
+      "loopConfig": {},
+      "classification": {},
+      "profile": {
+        "name": "New Board",
+        "loopPairs": [
+          {
+            "enabled": true,
+            "distance_m": 2.2,
+            "sensor1": 0,
+            "ch1": 0,
+            "sensor2": 1,
+            "ch2": 0
+          },
+          {
+            "enabled": false,
+            "distance_m": 2.4,
+            "sensor1": 0,
+            "ch1": 1,
+            "sensor2": 1,
+            "ch2": 1
+          }
+        ],
+        "detector": {
+          "min_event_ms": 25,
+          "max_event_ms": 5000,
+          "enter_thresh": 1.5,
+          "exit_ratio": 0.7,
+          "auto_threshold": true,
+          "enter_sigma": 4,
+          "abs_sigma": 6
+        },
+        "classification": {
+          "motor_max_len": 1.2,
+          "car_max_len": 3.8,
+          "pickup_max_len": 5.2,
+          "van_max_len": 6.5,
+          "bus_max_len": 10.5,
+          "truck_s_max_len": 12,
+          "truck_2_max_len": 15,
+          "truck_3_max_len": 18,
+          "truck_4_plus_min_len": 20
+        },
+        "report": {
+          "enabled": true,
+          "interval_min": 1,
+          "clear_on_report": false
+        }
+      },
+      "stats": {
+        "deviceId": "122",
+        "raw": "TRAFFIC_REPORT|ts:2026-09-12T12:44:44+0330|dur_s:420|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+        "ts": "2026-09-12T12:44:44+0330",
+        "type": "traffic-report",
+        "duration_s": 420,
+        "total": 0,
+        "avg_speed": 0,
+        "speed_viol": 0,
+        "dist_viol": 0,
+        "lane_viol": 0,
+        "classes": {
+          "Unknown": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Motor": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Car": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Pickup": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Van": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Bus": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "TruckS": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Truck2": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Truck3": {
+            "cnt": 0,
+            "avg": 0
+          },
+          "Truck4+": {
+            "cnt": 0,
+            "avg": 0
+          }
+        }
+      },
+      "events": [],
+      "trafficReports": [
+        {
+          "ts": "2026-09-12T12:39:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:40:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:41:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:42:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:43:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        },
+        {
+          "ts": "2026-09-12T12:44:44+0330",
+          "total": 0,
+          "avg_speed": 0,
+          "speed_viol": 0,
+          "dist_viol": 0,
+          "lane_viol": 0,
+          "classes": {
+            "Unknown": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Motor": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Car": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Pickup": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Van": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Bus": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "TruckS": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck2": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck3": {
+              "cnt": 0,
+              "avg": 0
+            },
+            "Truck4+": {
+              "cnt": 0,
+              "avg": 0
+            }
+          }
+        }
+      ],
+      "history": [
+        {
+          "ts": "2026-09-12T09:08:59.864Z",
+          "message": "MQTT_ID|122",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T09:08:59.977Z",
+          "message": "MQTT_ID|122",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T09:09:27.195Z",
+          "message": "RSP|3|OTA_ACCEPTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T09:09:47.838Z",
+          "message": "MQTT_ID|122",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T09:09:47.962Z",
+          "message": "MQTT_ID|122",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T09:09:48.058Z",
+          "message": "OTA_ERROR|download_connect_failed",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T09:09:48.333Z",
+          "message": "OTA_ERROR|download_connect_failed",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T09:09:48.632Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:39:44+0330|dur_s:120|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:10:16.973Z",
+          "message": "RSP|4|OTA_ACCEPTED",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T09:10:37.361Z",
+          "message": "MQTT_ID|122",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T09:10:37.499Z",
+          "message": "MQTT_ID|122",
+          "type": "identity"
+        },
+        {
+          "ts": "2026-09-12T09:10:37.581Z",
+          "message": "OTA_ERROR|download_connect_failed",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T09:10:37.870Z",
+          "message": "OTA_ERROR|download_connect_failed",
+          "type": "raw"
+        },
+        {
+          "ts": "2026-09-12T09:10:46.542Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:40:44+0330|dur_s:180|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:11:46.413Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:41:44+0330|dur_s:240|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:12:46.523Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:42:44+0330|dur_s:300|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:12:51.067Z",
+          "message": "POWER|bat:0.00|sol:11.02|low:1",
+          "type": "power"
+        },
+        {
+          "ts": "2026-09-12T09:13:46.538Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:43:44+0330|dur_s:360|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        },
+        {
+          "ts": "2026-09-12T09:14:46.405Z",
+          "message": "TRAFFIC_REPORT|ts:2026-09-12T12:44:44+0330|dur_s:420|total:0|avg_speed:0.0|speed_viol:0|dist_viol:0|lane_viol:0|Unknown_cnt:0|Unknown_avg:0.0|Motor_cnt:0|Motor_avg:0.0|Car_cnt:0|Car_avg:0.0|Pickup_cnt:0|Pickup_avg:0.0|Van_cnt:0|Van_avg:0.0|Bus_cnt:0|Bus_avg:0.0|TruckS_cnt:0|TruckS_avg:0.0|Truck2_cnt:0|Truck2_avg:0.0|Truck3_cnt:0|Truck3_avg:0.0|Truck4+_cnt:0|Truck4+_avg:0.0",
+          "type": "traffic-report"
+        }
+      ],
+      "everConnected": true,
+      "commandLog": [
+        {
+          "cmdId": "3",
+          "boardId": "122",
+          "command": "OTA_UPDATE|http://localhost:3000/firmware/firmware.bin|",
+          "broadcast": false,
+          "topics": [
+            "vehicles/122/commands"
+          ],
+          "ts": "2026-09-12T09:09:25.055Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T09:09:27.195Z",
+          "replyBody": "RSP|3|OTA_ACCEPTED"
+        },
+        {
+          "cmdId": "4",
+          "boardId": "122",
+          "command": "OTA_UPDATE|http://localhost:3000/firmware/firmware.bin|",
+          "broadcast": false,
+          "topics": [
+            "vehicles/122/commands"
+          ],
+          "ts": "2026-09-12T09:10:14.043Z",
+          "status": "replied",
+          "replyTs": "2026-09-12T09:10:16.973Z",
+          "replyBody": "RSP|4|OTA_ACCEPTED"
+        }
+      ],
+      "lastReply": "RSP|4|OTA_ACCEPTED"
     }
   ]
 }

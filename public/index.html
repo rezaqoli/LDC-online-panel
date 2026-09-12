@@ -123,6 +123,7 @@
         <nav class="menu" aria-label="Dashboard sections">
           <button class="active" data-section="overview">◉ Overview</button>
           <button data-section="console">⌘ Console &amp; Activity</button>
+          <button data-section="firmware">⬆ Firmware &amp; OTA</button>
           <button data-section="loop">⇄ Loop Pairs</button>
           <button data-section="detector">◈ Detector &amp; Thresholds</button>
           <button data-section="classification">▦ Vehicle Classification</button>
@@ -268,6 +269,50 @@
             <div class="field"><label>Truck 2 max</label><input id="cfgTruck2Max" type="number" step="0.1"></div>
             <div class="field"><label>Truck 3 max</label><input id="cfgTruck3Max" type="number" step="0.1"></div>
             <div class="field"><label>Truck 4+ min</label><input id="cfgTruck4Min" type="number" step="0.1"></div>
+          </div>
+        </div>
+        <div class="config-section section hidden" data-section-content="firmware">
+          <h2>Firmware & OTA Update</h2>
+          
+          <!-- Upload Firmware -->
+          <div class="panel" style="margin-bottom: 20px;">
+            <h3>Upload Firmware (.bin)</h3>
+            <div class="controls">
+              <input type="file" id="firmwareFileInput" accept=".bin" />
+              <button onclick="uploadFirmware()">Upload</button>
+            </div>
+            <div id="firmwareUploadStatus" class="small" style="margin-top: 8px;"></div>
+          </div>
+
+          <!-- Available Firmware Files -->
+          <div class="panel" style="margin-bottom: 20px;">
+            <h3>Available Firmware Files</h3>
+            <div id="firmwareList" style="max-height: 200px; overflow-y: auto;"></div>
+            <button onclick="refreshFirmwareList()" style="margin-top: 10px;">Refresh List</button>
+          </div>
+
+          <!-- OTA Update -->
+          <div class="panel">
+            <h3>Trigger OTA Update</h3>
+            <div class="field">
+              <label>Select Firmware</label>
+              <select id="otaFirmwareSelect">
+                <option value="">-- Select a firmware file --</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>MD5 Hash (optional but recommended)</label>
+              <input id="otaMd5Input" type="text" placeholder="Auto-filled from selected file" readonly />
+            </div>
+            <div class="field">
+              <label>Firmware URL</label>
+              <input id="otaUrlInput" type="text" placeholder="Auto-filled from selected file" />
+            </div>
+            <div class="controls" style="margin-top: 14px;">
+              <button onclick="triggerOTA()" style="background: var(--warning);">Start OTA Update</button>
+              <button onclick="clearOTAForm()">Clear</button>
+            </div>
+            <div id="otaStatus" class="log" style="margin-top: 14px; max-height: 200px;"></div>
           </div>
         </div>
         <div class="config-section section hidden" data-section-content="reporting">
@@ -659,7 +704,7 @@
       }
 
       function selectSection(section) {
-        const configSections = ['loop', 'detector', 'classification', 'reporting'];
+        const configSections = ['loop', 'detector', 'classification', 'reporting', 'firmware'];
         const configVisible = configSections.includes(section);
         document.querySelectorAll('[data-section-content]').forEach((node) => {
           const key = node.dataset.sectionContent;
@@ -678,6 +723,77 @@
           ? 'Targets: selected board + all boards'
           : 'Target: selected board only';
       });
+      let firmwareFiles = [];
+      let firmwareMd5Map = {};
+      function refreshFirmwareList() {
+        fetch('/api/firmware').then((r) => r.json()).then((data) => {
+          firmwareFiles = data.files || [];
+          renderFirmwareList();
+          updateOTASelect();
+        }).catch((err) => {
+          document.getElementById('firmwareList').textContent = 'Error: ' + err.message;
+        });
+      }
+      function renderFirmwareList() {
+        const c = document.getElementById('firmwareList');
+        if (!firmwareFiles.length) { c.innerHTML = '<div class="small">No firmware files uploaded yet.</div>'; return; }
+        c.innerHTML = firmwareFiles.map((f) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span>' + f.name + ' <span class="small">(' + (f.size / 1024).toFixed(1) + ' KB)</span></span><button onclick="deleteFirmware(\'' + f.name + '\')" style="background:var(--danger);padding:4px 8px;font-size:12px;">Delete</button></div>').join('');
+      }
+      function updateOTASelect() {
+        const s = document.getElementById('otaFirmwareSelect');
+        s.innerHTML = '<option value="">-- Select a firmware file --</option>' + firmwareFiles.map((f) => '<option value="' + f.name + '">' + f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)</option>').join('');
+      }
+      function uploadFirmware() {
+        const inp = document.getElementById('firmwareFileInput');
+        const st = document.getElementById('firmwareUploadStatus');
+        if (!inp.files.length) { st.textContent = 'Please select a .bin file first.'; st.style.color = 'var(--danger)'; return; }
+        const file = inp.files[0];
+        if (!file.name.endsWith('.bin')) { st.textContent = 'Only .bin files are allowed.'; st.style.color = 'var(--danger)'; return; }
+        const fd = new FormData(); fd.append('firmware', file);
+        st.textContent = 'Uploading...'; st.style.color = 'var(--muted)';
+        fetch('/api/firmware/upload', { method: 'POST', body: fd }).then((r) => r.json().then((d) => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
+          if (!ok) throw new Error(data.error || 'Upload failed');
+          st.textContent = 'Uploaded: ' + data.filename + ' (' + (data.size / 1024).toFixed(1) + ' KB) MD5: ' + data.md5; st.style.color = 'var(--success)';
+          firmwareMd5Map[data.filename] = data.md5;
+          refreshFirmwareList();
+          setTimeout(() => { const sel = document.getElementById('otaFirmwareSelect'); sel.value = data.filename; otaSelectChanged(); }, 400);
+          inp.value = '';
+        }).catch((err) => { st.textContent = 'Upload error: ' + err.message; st.style.color = 'var(--danger)'; });
+      }
+      function deleteFirmware(filename) {
+        if (!confirm('Delete firmware file: ' + filename + '?')) return;
+        fetch('/api/firmware/' + encodeURIComponent(filename), { method: 'DELETE' }).then((r) => r.json()).then(() => refreshFirmwareList()).catch((err) => alert('Delete failed: ' + err.message));
+      }
+      function clearOTAForm() {
+        document.getElementById('otaFirmwareSelect').value = '';
+        document.getElementById('otaMd5Input').value = '';
+        document.getElementById('otaUrlInput').value = '';
+        document.getElementById('otaStatus').textContent = '';
+      }
+      function otaSelectChanged() {
+        const sel = document.getElementById('otaFirmwareSelect');
+        const md5 = document.getElementById('otaMd5Input');
+        const url = document.getElementById('otaUrlInput');
+        if (sel.value) { url.value = location.protocol + '//' + location.host + '/firmware/' + sel.value; md5.value = firmwareMd5Map[sel.value] || ''; }
+        else { url.value = ''; md5.value = ''; }
+      }
+      function triggerOTA() {
+        const deviceId = state.selectedId;
+        if (!deviceId) { alert('Please select a device first.'); return; }
+        const firmwareUrl = document.getElementById('otaUrlInput').value.trim();
+        const md5Hash = document.getElementById('otaMd5Input').value.trim();
+        if (!firmwareUrl) { alert('Please select a firmware file.'); return; }
+        const statusEl = document.getElementById('otaStatus');
+        statusEl.textContent = 'Sending OTA command to board ' + deviceId + '...\nURL: ' + firmwareUrl + '\nMD5: ' + (md5Hash || '(none)') + '\n';
+        fetch('/api/device/' + encodeURIComponent(deviceId) + '/ota', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firmwareUrl, md5Hash }) }).then((r) => r.json().then((d) => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
+          if (!ok) throw new Error(data.error || 'OTA trigger failed');
+          statusEl.textContent += '\nOTA command sent! CmdId: ' + data.cmdId + '\nCommand: ' + data.command + '\n\nWaiting for board responses (OTA_ACCEPTED, OTA_PROGRESS, OTA_SUCCESS/OTA_ERROR)...\nCheck Console & Activity for live updates.';
+          statusEl.style.color = 'var(--success)';
+        }).catch((err) => { statusEl.textContent += '\nError: ' + err.message; statusEl.style.color = 'var(--danger)'; });
+      }
+      document.getElementById('otaFirmwareSelect')?.addEventListener('change', otaSelectChanged);
+      refreshFirmwareList();
+
       document.getElementById('messageFilter').addEventListener('change', renderMessageLog);
       document.getElementById('messageSearch').addEventListener('input', renderMessageLog);
       renderMessageLog();
