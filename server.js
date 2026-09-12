@@ -13,6 +13,8 @@ const {
   unwrapCommandEnvelope,
   parseTrafficReport,
   parseEventMessage,
+  isInternalClientId,
+  resolveBoardId,
 } = require('./parsers.js');
 
 const app = express();
@@ -243,40 +245,6 @@ function parseEventMessageLocal(deviceId, message) {
   return evt;
 }
 
-function resolveBoardId(client, topic, message) {
-  const candidate = [];
-
-  // MQTT_ID is the board's canonical identity. It must win over a transient
-  // topic/client ID, especially for RSP|...|MQTT_ID|... on the global topic.
-  const mqttIdMatch = message.match(/(?:^|[|])MQTT_ID\|([^|]+)/i);
-  if (mqttIdMatch && mqttIdMatch[1]) candidate.push(String(mqttIdMatch[1]).trim());
-
-  // 1) Preferred: <id> segment from vehicles/<id>/... topic
-  const topicSegments = String(topic || '').split('/').filter(Boolean);
-  if (topicSegments.length >= 3 && topicSegments[0] === 'vehicles') {
-    const seg = topicSegments[1];
-    if (seg && !['+', '#'].includes(seg)) candidate.push(seg);
-  }
-
-  if (client && client.id && !isInternalClientId(client.id)) candidate.push(String(client.id));
-
-  const genericIdMatch = message.match(/(?:^|[|])(device_id|board_id|client_id|id)\:([^|]+)/i);
-  if (genericIdMatch && genericIdMatch[2]) candidate.push(String(genericIdMatch[2]).trim());
-
-  if (topicSegments.length) {
-    topicSegments.forEach((segment) => {
-      if (segment && !['vehicles', 'commands', 'command_responses', 'events', 'report', 'status', 'power', 'speed', '+', '#'].includes(segment)) candidate.push(segment);
-    });
-  }
-
-  for (const value of candidate) {
-    const cleaned = value.trim();
-    if (cleaned && cleaned !== 'unknown') return cleaned;
-  }
-
-  return 'unknown';
-}
-
 function setDeviceStatus(deviceId, status, meta = {}) {
   let device = findDevice(deviceId);
   if (!device) {
@@ -445,11 +413,6 @@ function trackClientLifecycle() {
   });
 }
 
-function isInternalClientId(id) {
-  if (!id) return false;
-  return /^dashboard-(bridge|cmd)-/i.test(String(id));
-}
-
 function computeGlobalAnalytics() {
   const allReports = state.devices.flatMap((d) => d.trafficReports || []);
   const totalVehicles = allReports.reduce((sum, r) => sum + Number(r.total || 0), 0);
@@ -501,37 +464,26 @@ broker.on('clientError', (client, err) => {
 
 broker.on('publish', (packet, client) => {
   if (!packet || !packet.topic) return;
-  const topic = packet.topic;
+  const topic = String(packet.topic);
   const payload = packet.payload ? packet.payload.toString() : '';
   const clientId = client?.id || '';
   const isCommandTopic = topic === 'vehicles/commands' || /\/commands$/.test(topic);
   const kind = isCommandTopic ? 'out' : 'in';
-  recordMessage(kind, topic, payload, clientId);
-  if (
-    /\/events$/.test(topic) ||
-    /\/command_responses$/.test(topic) ||
-    /\/speed$/.test(topic) ||
-    topic === 'vehicles/events' ||
-    topic === 'vehicles/command_responses' ||
-    topic.includes('report') ||
-    topic.includes('status') ||
-    topic.includes('power')
-  ) {
-    let deviceId = resolveBoardId(client, topic, payload);
-    // Global command responses do not contain a board id in their topic. The
-    // command id lets the dashboard recover the target board from its pending
-    // command table, even before the board-specific topic is known.
-    if (deviceId === 'unknown' && /(^|\/)command_responses$/.test(topic)) {
-      const { cmdId } = unwrapCommandEnvelope(payload);
-      const pending = cmdId ? state.pendingCommands.get(cmdId) : null;
-      if (pending) deviceId = pending.boardId;
-    }
-    if (deviceId !== 'unknown') updateDeviceFromMessage(deviceId, normalizePayload(payload), clientId);
+  if (process.env.DEBUG_MQTT === '1') {
+    console.log(`[mqtt] ${kind} ${topic} (client=${clientId || '-'}) ${payload}`);
   }
 });
 
 // MQTT client to subscribe to board topics and relay into the dashboard state.
-const edgeClient = mqtt.connect('mqtt://localhost:' + mqttPort, { clientId: 'dashboard-bridge-' + uuidv4() });
+// By default it connects to the local aedes broker, but when the ESP32
+// publishes to a different broker (e.g. a cellular MQTT relay at 1011),
+// set MQTT_URL=mqtt://host:port to point the bridge at the real broker.
+const edgeBrokerUrl = process.env.MQTT_URL || ('mqtt://localhost:' + mqttPort);
+const mqttClientOptions = { protocolVersion: 4, clean: true };
+const edgeClient = mqtt.connect(edgeBrokerUrl, {
+  ...mqttClientOptions,
+  clientId: 'dashboard-bridge-' + uuidv4()
+});
 edgeClient.on('connect', () => {
   const subs = [
     'vehicles/+/events',
@@ -543,7 +495,32 @@ edgeClient.on('connect', () => {
     'vehicles/commands'
   ];
   subs.forEach((t) => edgeClient.subscribe(t));
-  console.log('[dashboard] subscribed to per-board and legacy topics');
+  console.log(`[dashboard] bridge connected to ${edgeBrokerUrl}, subscribed to per-board and legacy topics`);
+});
+edgeClient.on('error', (err) => {
+  console.error(`[dashboard] bridge error on ${edgeBrokerUrl}: ${err.message}`);
+});
+edgeClient.on('message', (topic, payload) => {
+  const rawPayload = normalizePayload(payload.toString());
+  const isCommandTopic = topic === 'vehicles/commands' || /\/commands$/.test(topic);
+  recordMessage(isCommandTopic ? 'out' : 'in', topic, rawPayload, 'dashboard-bridge');
+
+  if (!isCommandTopic && (
+    /\/events$/.test(topic) ||
+    /\/command_responses$/.test(topic) ||
+    /\/speed$/.test(topic) ||
+    topic === 'vehicles/events' ||
+    topic === 'vehicles/command_responses' ||
+    topic.includes('report') || topic.includes('status') || topic.includes('power')
+  )) {
+    let deviceId = resolveBoardId(null, topic, rawPayload);
+    if (deviceId === 'unknown' && /(^|\/)command_responses$/.test(topic)) {
+      const { cmdId } = unwrapCommandEnvelope(rawPayload);
+      const pending = cmdId ? state.pendingCommands.get(cmdId) : null;
+      if (pending) deviceId = pending.boardId;
+    }
+    if (deviceId !== 'unknown') updateDeviceFromMessage(deviceId, rawPayload, 'dashboard-bridge');
+  }
 });
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -641,7 +618,10 @@ app.post('/api/device/:id/profile', (req, res) => {
 let commandClient = null;
 function getCommandClient() {
   if (!commandClient || !commandClient.connected) {
-    commandClient = mqtt.connect('mqtt://localhost:' + mqttPort, { clientId: 'dashboard-cmd-' + uuidv4() });
+    commandClient = mqtt.connect(edgeBrokerUrl, {
+      ...mqttClientOptions,
+      clientId: 'dashboard-cmd-' + uuidv4()
+    });
   }
   return commandClient;
 }
@@ -658,8 +638,8 @@ app.post('/api/device/:id/command', (req, res) => {
   // on the selected vehicle, which subscribes to both topic forms.
   const topics = [broadcast ? 'vehicles/commands' : `vehicles/${encodeURIComponent(d.id)}/commands`];
   const client = getCommandClient();
-  let pending = false;
-  topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
+  // Register the correlation entry before publishing. A local/low-latency
+  // broker can deliver the board response immediately.
   state.pendingCommands.set(cmdId, {
     cmdId,
     boardId: d.id,
@@ -669,6 +649,7 @@ app.post('/api/device/:id/command', (req, res) => {
     ts: new Date().toISOString(),
     status: 'pending'
   });
+  topics.forEach((t) => client.publish(t, envelope, { qos: 0 }, () => {}));
   res.json({ ok: true, cmdId, topics, command: cmd });
 });
 

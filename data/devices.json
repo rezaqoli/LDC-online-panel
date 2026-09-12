@@ -1,3 +1,95 @@
 {
-  "devices": []
+  "devices": [
+    {
+      "id": "30",
+      "name": "Board-30",
+      "status": "offline",
+      "lastSeen": "2026-09-07T15:22:58.209Z",
+      "power": {
+        "battery": 0,
+        "solar": 0
+      },
+      "network": {
+        "signal": 0
+      },
+      "loopConfig": {},
+      "classification": {},
+      "profile": {
+        "name": "New Board",
+        "loopPairs": [
+          {
+            "enabled": false,
+            "distance_m": 0.4,
+            "sensor1": 0,
+            "ch1": 0,
+            "sensor2": 0,
+            "ch2": 1
+          },
+          {
+            "enabled": false,
+            "distance_m": 0.4,
+            "sensor1": 0,
+            "ch1": 2,
+            "sensor2": 0,
+            "ch2": 3
+          },
+          {
+            "enabled": false,
+            "distance_m": 0.4,
+            "sensor1": 1,
+            "ch1": 0,
+            "sensor2": 1,
+            "ch2": 1
+          },
+          {
+            "enabled": false,
+            "distance_m": 0.4,
+            "sensor1": 1,
+            "ch1": 2,
+            "sensor2": 1,
+            "ch2": 3
+          }
+        ],
+        "detector": {
+          "min_event_ms": 25,
+          "max_event_ms": 5000,
+          "enter_thresh": 1.5,
+          "exit_ratio": 0.7,
+          "auto_threshold": true,
+          "enter_sigma": 4,
+          "abs_sigma": 6
+        },
+        "classification": {
+          "motor_max_len": 1.2,
+          "car_max_len": 3.8,
+          "pickup_max_len": 5.2,
+          "van_max_len": 6.5,
+          "bus_max_len": 10.5,
+          "truck_s_max_len": 12,
+          "truck_2_max_len": 15,
+          "truck_3_max_len": 18,
+          "truck_4_plus_min_len": 20
+        },
+        "report": {
+          "enabled": true,
+          "interval_min": 5,
+          "clear_on_report": false
+        }
+      },
+      "stats": {},
+      "events": [],
+      "trafficReports": [],
+      "history": [
+        {
+          "ts": "2026-09-07T15:22:58.209Z",
+          "message": "TEST|hello",
+          "type": "raw"
+        }
+      ],
+      "clientIds": [
+        "dashboard-bridge"
+      ],
+      "everConnected": true
+    }
+  ]
 }

@@ -37,6 +37,61 @@ function unwrapCommandEnvelope(raw) {
   return { cmdId: null, body: raw };
 }
 
+// Internal client ids that the dashboard itself uses (bridge/cmd). These must
+// not be promoted to board devices — only real ESP32/board client ids count.
+function isInternalClientId(id) {
+  if (!id) return false;
+  return /^dashboard-(bridge|cmd)-/i.test(String(id));
+}
+
+// Resolve a board id from a publish context. The MQTT_ID|<value> token in the
+// payload is the canonical board identity and wins over topic segments and
+// transient client ids. The function is exported so the detection logic can be
+// unit-tested without spinning up an MQTT broker.
+function resolveBoardId(client, topic, message) {
+  const candidate = [];
+
+  // 1) Canonical identity: MQTT_ID|<value> at start of body or after a pipe.
+  //    Tolerate whitespace around the value.
+  const mqttIdMatch = String(message || '').match(/(?:^|[|]\s*)MQTT_ID\s*[|:]\s*([^|,\r\n]+)/i);
+  if (mqttIdMatch && mqttIdMatch[1]) {
+    candidate.push(String(mqttIdMatch[1]).trim());
+  }
+
+  // 2) Preferred: <id> segment from vehicles/<id>/... topic
+  const topicSegments = String(topic || '').split('/').filter(Boolean);
+  if (topicSegments.length >= 3 && topicSegments[0] === 'vehicles') {
+    const seg = topicSegments[1];
+    if (seg && !['+', '#'].includes(seg)) candidate.push(seg);
+  }
+
+  // 3) Non-internal client id from the broker connection event.
+  if (client && client.id && !isInternalClientId(client.id)) {
+    candidate.push(String(client.id));
+  }
+
+  // 4) Generic key:value identifiers (device_id, board_id, id, client_id).
+  const genericIdMatch = String(message || '').match(/(?:^|[|])(device_id|board_id|client_id|id)\s*:\s*([^|,\r\n]+)/i);
+  if (genericIdMatch && genericIdMatch[2]) {
+    candidate.push(String(genericIdMatch[2]).trim());
+  }
+
+  // 5) Any other topic segment that looks like a board id.
+  if (topicSegments.length) {
+    topicSegments.forEach((segment) => {
+      if (segment && !['vehicles', 'commands', 'command_responses', 'events', 'report', 'status', 'power', 'speed', '+', '#'].includes(segment)) {
+        candidate.push(segment);
+      }
+    });
+  }
+
+  for (const value of candidate) {
+    const cleaned = String(value || '').trim();
+    if (cleaned && cleaned !== 'unknown') return cleaned;
+  }
+  return 'unknown';
+}
+
 function parseTrafficReport(line, deviceId) {
   const obj = parsePipeKv(line);
   const out = {
@@ -101,4 +156,6 @@ module.exports = {
   unwrapCommandEnvelope,
   parseTrafficReport,
   parseEventMessage,
+  isInternalClientId,
+  resolveBoardId,
 };
