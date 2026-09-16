@@ -12,6 +12,7 @@ const {
   unwrapCommandEnvelope,
   parseTrafficReport,
   parseEventMessage,
+  applyConfigurationReply,
 } = require('./parsers.js');
 const crypto = require('crypto');
 const multer = require('multer');
@@ -278,11 +279,17 @@ function setDeviceStatus(deviceId, status, meta = {}) {
 
 function updateDeviceFromMessage(deviceId, message) {
   let device = setDeviceStatus(deviceId, 'online');
-
-  const evt = parseEventMessageLocal(deviceId, message);
+  const unwrapped = unwrapCommandEnvelope(message);
+  const evt = parseEventMessageLocal(deviceId, unwrapped.body);
   device.lastSeen = new Date().toISOString();
   device.status = 'online';
   device.everConnected = true;
+  const updatedProfile = applyConfigurationReply(device.profile || defaultProfile(), message);
+  if (JSON.stringify(updatedProfile) !== JSON.stringify(device.profile || {})) {
+    device.profile = updatedProfile;
+    device.loopConfig = updatedProfile.loopPairs || device.loopConfig;
+    device.classification = updatedProfile.classification || device.classification;
+  }
 
   if (evt.type === 'identity' && evt.boardId) {
     device.id = evt.boardId;

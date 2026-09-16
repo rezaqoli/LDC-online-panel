@@ -94,10 +94,74 @@ function parseEventMessage(deviceId, message) {
   return evt;
 }
 
+function numberValue(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+// Merge configuration/status replies emitted by processSystemCommand into a
+// dashboard profile. Unknown replies are intentionally ignored.
+function applyConfigurationReply(profile = {}, raw = '') {
+  const { body } = unwrapCommandEnvelope(normalizePayload(raw));
+  const next = JSON.parse(JSON.stringify(profile || {}));
+  const ensure = (key) => (next[key] ||= {});
+  const n = (v) => numberValue(v);
+
+  if (body.startsWith('CONFIG|')) {
+    const kv = parsePipeKv(body);
+    const detector = ensure('detector');
+    const classification = ensure('classification');
+    const detectorMap = {
+      enter: 'enter_thresh', abs: 'absolute_min_dev', exit_ratio: 'exit_ratio', hyst: 'exit_hysteresis_cnt',
+      min_ms: 'min_event_ms', max_ms: 'max_event_ms', prom: 'peak_prominence_ratio', axle_ms: 'min_axle_distance_ms',
+      confirm: 'confirm_samples', min_samples: 'min_samples', peak_ratio: 'peak_ratio', enter_hyst: 'enter_hysteresis',
+      exit_hyst: 'exit_hysteresis', enter_sigma: 'enter_sigma', abs_sigma: 'abs_sigma', default_kmh: 'default_speed_kmh'
+    };
+    const classMap = {
+      motor: 'motor_max_len', car: 'car_max_len', pickup: 'pickup_max_len', van: 'van_max_len', bus: 'bus_max_len',
+      truckS: 'truck_s_max_len', truck2: 'truck_2_max_len', truck3: 'truck_3_max_len', truck4min: 'truck_4_plus_min_len',
+      rise_short: 'rise_short_ms', rise_mid: 'rise_mid_ms', rise_long: 'rise_long_ms', energy_low: 'energy_low',
+      energy_mid: 'energy_mid', energy_high: 'energy_high', crest_spiky: 'crest_spiky', crest_broad: 'crest_broad',
+      skew_tol: 'skew_tol', skew_high: 'skew_high', com_min: 'com_min', com_max: 'com_max', width_mid: 'width_mid',
+      width_wide: 'width_wide', std_high: 'std_high', std_low: 'std_low'
+    };
+    Object.entries(detectorMap).forEach(([wire, key]) => { if (n(kv[wire]) !== undefined) detector[key] = n(kv[wire]); });
+    Object.entries(classMap).forEach(([wire, key]) => { if (n(kv[wire]) !== undefined) classification[key] = n(kv[wire]); });
+    if (kv.auto !== undefined) detector.auto_threshold = Number(kv.auto) !== 0;
+    next.loopPairs ||= [];
+    next.loopPairs[0] = { ...(next.loopPairs[0] || {}), enabled: Number(kv.dual) !== 0, distance_m: n(kv.dist), sensor1: n(kv.s1), ch1: n(kv.c1), sensor2: n(kv.s2), ch2: n(kv.c2) };
+  } else if (body.startsWith('CONFIG_ACK|')) {
+    const kv = parsePipeKv(body);
+    const positional = body.split('|').slice(1).filter((x) => !x.includes(':'));
+    const idx = n(kv.idx ?? positional[0]);
+    if (idx !== undefined) {
+      next.loopPairs ||= [];
+      next.loopPairs[idx] = { ...(next.loopPairs[idx] || {}), enabled: Number(kv.dual ?? positional[1]) !== 0,
+        distance_m: n(kv.dist ?? positional[2]), sensor1: n(kv.s1 ?? positional[3]), ch1: n(kv.c1 ?? positional[4]),
+        sensor2: n(kv.s2 ?? positional[5]), ch2: n(kv.c2 ?? positional[6]) };
+    }
+  } else if (body.startsWith('RULES_ACK|')) {
+    const kv = parsePipeKv(body); const rules = ensure('rules');
+    const map = { limit: 'speed_limit_kmh', tol: 'speed_tolerance_kmh', min_dist: 'min_follow_distance_m', min_headway: 'min_headway_s', max_headway: 'max_headway_ms', straddle_ms: 'min_straddle_overlap_ms', straddle_ratio: 'min_straddle_overlap_ratio', assume_kmh: 'assume_speed_kmh' };
+    Object.entries(map).forEach(([wire, key]) => { if (n(kv[wire]) !== undefined) rules[key] = n(kv[wire]); });
+  } else if (body.startsWith('REPORT_CFG|')) {
+    const p = body.split('|'); next.report = { ...(next.report || {}), enabled: Number(p[1]) !== 0, interval_min: (n(p[2]) || 0) / 60000, clear_on_report: Number(p[3]) !== 0 };
+  } else if (body.startsWith('MQTT_CFG|')) {
+    const p = body.split('|'); next.mqtt = { ...(next.mqtt || {}), id: p[1] || '', server: p[2] || '', port: n(p[3]) || 0, ip: p[4] || '', user: p[5] || '', pass: p[6] || '', apn: p[7] || '', topic_events: p[8] || '', topic_commands: p[9] || '', topic_responses: p[10] || '' };
+  } else if (body.startsWith('SENSOR_LC|')) {
+    const p = body.split('|').slice(1); next.sensorLC ||= [];
+    for (let i = 0; i + 3 < p.length; i += 4) { const m = p[i].match(/^s(\d)c(\d):(.+)$/); if (m) next.sensorLC[Number(m[1]) * 4 + Number(m[2])] = { sensor: Number(m[1]), channel: Number(m[2]), l: n(m[3]), c: n(p[i + 1]), conversion_time: n(p[i + 2]), driver_current: n(p[i + 3]) }; }
+  } else if (body.startsWith('DEFAULT_KMH|')) {
+    ensure('detector').default_speed_kmh = n(body.split('|')[1]);
+  }
+  return next;
+}
+
 module.exports = {
   normalizePayload,
   parsePipeKv,
   unwrapCommandEnvelope,
   parseTrafficReport,
   parseEventMessage,
+  applyConfigurationReply,
 };

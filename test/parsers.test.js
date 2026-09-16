@@ -9,6 +9,7 @@ const {
   unwrapCommandEnvelope,
   parseTrafficReport,
   parseEventMessage,
+  applyConfigurationReply,
 } = require('../parsers.js');
 
 test('normalizePayload handles Buffer / object / string', () => {
@@ -83,4 +84,21 @@ test('parseEventMessage returns raw event for unknown prefix', () => {
   const e = parseEventMessage('B1', 'GNSS|valid:1|lat:35.7|lon:51.4');
   assert.equal(e.type, undefined);
   assert.equal(e.raw, 'GNSS|valid:1|lat:35.7|lon:51.4');
+});
+
+test('configuration replies merge into a dashboard profile', () => {
+  let profile = applyConfigurationReply({}, 'RSP|c1|CONFIG|enter:1.25|exit_ratio:0.60|hyst:4|min_ms:30|max_ms:4000|auto:1|default_kmh:45|motor:1.3|rise_short:20|dual:1|dist:2.5|s1:0|c1:1|s2:1|c2:2');
+  assert.equal(profile.detector.enter_thresh, 1.25);
+  assert.equal(profile.detector.exit_hysteresis_cnt, 4);
+  assert.equal(profile.detector.auto_threshold, true);
+  assert.equal(profile.classification.rise_short_ms, 20);
+  assert.deepEqual(profile.loopPairs[0], { enabled: true, distance_m: 2.5, sensor1: 0, ch1: 1, sensor2: 1, ch2: 2 });
+
+  profile = applyConfigurationReply(profile, 'RULES_ACK|limit:60|tol:5|min_dist:12|min_headway:1.50|max_headway:5000|straddle_ms:80|straddle_ratio:0.25|assume_kmh:48');
+  assert.equal(profile.rules.min_follow_distance_m, 12);
+  assert.equal(profile.rules.assume_speed_kmh, 48);
+
+  profile = applyConfigurationReply(profile, 'SENSOR_LC|s0c0:100.500|2.250|120|15|s1c3:99.000|3.000|130|16');
+  assert.equal(profile.sensorLC[0].l, 100.5);
+  assert.equal(profile.sensorLC[7].driver_current, 16);
 });
