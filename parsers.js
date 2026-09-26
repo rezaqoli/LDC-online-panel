@@ -114,8 +114,9 @@ function applyConfigurationReply(profile = {}, raw = '') {
     const detectorMap = {
       enter: 'enter_thresh', abs: 'absolute_min_dev', exit_ratio: 'exit_ratio', hyst: 'exit_hysteresis_cnt',
       min_ms: 'min_event_ms', max_ms: 'max_event_ms', prom: 'peak_prominence_ratio', axle_ms: 'min_axle_distance_ms',
-      confirm: 'confirm_samples', min_samples: 'min_samples', peak_ratio: 'peak_ratio', enter_hyst: 'enter_hysteresis',
-      exit_hyst: 'exit_hysteresis', enter_sigma: 'enter_sigma', abs_sigma: 'abs_sigma', default_kmh: 'default_speed_kmh'
+      confirm: 'confirm_samples', min_samples: 'min_event_samples', peak_ratio: 'peak_to_baseline_ratio', enter_hyst: 'enter_hysteresis_ratio',
+      exit_hyst: 'exit_hysteresis_ratio', enter_sigma: 'enter_sigma', abs_sigma: 'abs_sigma', default_kmh: 'default_speed_kmh',
+      deriv_sigma: 'derivative_sigma', deriv_slow_sigma: 'derivative_slow_sigma', deriv_window_ms: 'derivative_slow_window_ms'
     };
     const classMap = {
       motor: 'motor_max_len', car: 'car_max_len', pickup: 'pickup_max_len', van: 'van_max_len', bus: 'bus_max_len',
@@ -128,8 +129,17 @@ function applyConfigurationReply(profile = {}, raw = '') {
     Object.entries(detectorMap).forEach(([wire, key]) => { if (n(kv[wire]) !== undefined) detector[key] = n(kv[wire]); });
     Object.entries(classMap).forEach(([wire, key]) => { if (n(kv[wire]) !== undefined) classification[key] = n(kv[wire]); });
     if (kv.auto !== undefined) detector.auto_threshold = Number(kv.auto) !== 0;
-    next.loopPairs ||= [];
-    next.loopPairs[0] = { ...(next.loopPairs[0] || {}), enabled: Number(kv.dual) !== 0, distance_m: n(kv.dist), sensor1: n(kv.s1), ch1: n(kv.c1), sensor2: n(kv.s2), ch2: n(kv.c2) };
+    if (kv.entry_mode !== undefined) detector.entry_mode = kv.entry_mode;
+    // GET_CONFIG always includes pair 0 today, but only merge fields that were
+    // actually present so partial/older firmware replies cannot erase a profile.
+    if (['dual', 'dist', 's1', 'c1', 's2', 'c2'].some((key) => kv[key] !== undefined)) {
+      next.loopPairs ||= [];
+      const pair = { ...(next.loopPairs[0] || {}) };
+      if (kv.dual !== undefined) pair.enabled = Number(kv.dual) !== 0;
+      const pairMap = { dist: 'distance_m', s1: 'sensor1', c1: 'ch1', s2: 'sensor2', c2: 'ch2' };
+      Object.entries(pairMap).forEach(([wire, key]) => { if (n(kv[wire]) !== undefined) pair[key] = n(kv[wire]); });
+      next.loopPairs[0] = pair;
+    }
   } else if (body.startsWith('CONFIG_ACK|')) {
     const kv = parsePipeKv(body);
     const positional = body.split('|').slice(1).filter((x) => !x.includes(':'));

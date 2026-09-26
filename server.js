@@ -146,7 +146,10 @@ function buildDeviceSummary(device) {
     profile,
     stats: device.stats ?? null,
     lastReply: device.lastReply ?? null,
-    commandLog: Array.isArray(device.commandLog) ? device.commandLog.slice(-20) : [],
+    commandLog: [
+      ...(Array.isArray(device.commandLog) ? device.commandLog : []),
+      ...Array.from(state.pendingCommands.values()).filter((entry) => entry.boardId === device.id)
+    ].sort((a, b) => new Date(a.ts) - new Date(b.ts)).slice(-20),
     trafficReports: Array.isArray(device.trafficReports) ? device.trafficReports : []
   };
 }
@@ -402,9 +405,10 @@ function isInternalClientId(id) {
 function computeGlobalAnalytics() {
   const allReports = state.devices.flatMap((d) => d.trafficReports || []);
   const totalVehicles = allReports.reduce((sum, r) => sum + Number(r.total || 0), 0);
-  const avgSpeed = allReports.length
-    ? allReports.reduce((sum, r) => sum + Number(r.avg_speed || 0), 0) / allReports.length
-    : 0;
+  // Report averages must be weighted by vehicle count; averaging report
+  // averages makes a one-vehicle interval as influential as a busy interval.
+  const weightedSpeedTotal = allReports.reduce((sum, r) => sum + Number(r.avg_speed || 0) * Number(r.total || 0), 0);
+  const avgSpeed = totalVehicles ? weightedSpeedTotal / totalVehicles : 0;
   const violations = allReports.reduce((sum, r) => sum + Number(r.speed_viol || 0) + Number(r.dist_viol || 0) + Number(r.lane_viol || 0), 0);
 
   const classBreakdown = {};
@@ -486,14 +490,9 @@ edgeClient.on('connect', () => {
   subs.forEach((t) => edgeClient.subscribe(t));
   console.log('[dashboard] subscribed to per-board and legacy topics');
 });
-edgeClient.on('message', (topic, payload) => {
-  const rawPayload = payload.toString();
-  recordMessage(/\/commands$/.test(topic) || topic === 'vehicles/commands' ? 'out' : 'in', topic, rawPayload, 'dashboard-bridge');
-  if (rawPayload.startsWith('CMD|')) return;
-  // Prefer the <id> segment from the topic; otherwise try payload heuristics.
-  const resolved = resolveBoardId(null, topic, rawPayload);
-  if (resolved !== 'unknown') updateDeviceFromMessage(resolved, normalizePayload(rawPayload));
-});
+// State updates happen in broker.on('publish') above. Handling the bridge's
+// subscription here as well used to record and apply every packet twice,
+// inflating speed counters, reports and the live message log.
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -551,9 +550,10 @@ function getCommandClient() {
 app.post('/api/device/:id/command', (req, res) => {
   const d = findDevice(req.params.id);
   if (!d) return res.status(404).json({ error: 'not_found' });
-  const cmd = String(req.body?.command || '');
+  const cmd = String(req.body?.command || '').trim();
   const broadcast = req.body?.broadcast === true;
   if (!cmd) return res.status(400).json({ error: 'empty_command' });
+  if (cmd.length > 1200 || /[\r\n\0]/.test(cmd)) return res.status(400).json({ error: 'invalid_command' });
   const cmdId = String(++state.cmdCounter);
   const envelope = `CMD|${cmdId}|${cmd}`;
   const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`];
@@ -623,11 +623,14 @@ app.get('/api/firmware', (req, res) => {
     const files = fs.readdirSync(firmwareDir)
       .filter(f => f.endsWith('.bin'))
       .map(f => {
-        const stats = fs.statSync(path.join(firmwareDir, f));
+        const filePath = path.join(firmwareDir, f);
+        const stats = fs.statSync(filePath);
+        const md5 = crypto.createHash('md5').update(fs.readFileSync(filePath)).digest('hex');
         return {
           name: f,
           size: stats.size,
-          modified: stats.mtime.toISOString()
+          modified: stats.mtime.toISOString(),
+          md5
         };
       });
     res.json({ files });
@@ -711,8 +714,11 @@ app.post('/api/device/:id/ota', (req, res) => {
   const d = findDevice(req.params.id);
   if (!d) return res.status(404).json({ error: 'not_found' });
   
-  const { firmwareUrl, md5Hash } = req.body;
+  const firmwareUrl = String(req.body?.firmwareUrl || '').trim();
+  const md5Hash = String(req.body?.md5Hash || '').trim().toLowerCase();
   if (!firmwareUrl) return res.status(400).json({ error: 'firmwareUrl required' });
+  if (!/^(https?:\/\/|\/?firmware\/)/i.test(firmwareUrl)) return res.status(400).json({ error: 'invalid firmwareUrl' });
+  if (md5Hash && !/^[a-f0-9]{32}$/.test(md5Hash)) return res.status(400).json({ error: 'invalid md5Hash' });
   
   // Build full URL for locally hosted files
   let fullUrl = firmwareUrl;
@@ -723,8 +729,9 @@ app.post('/api/device/:id/ota', (req, res) => {
     fullUrl = `http://${host}/firmware/${filename}`;
   }
   
-  // Build OTA command per protocol
-  const cmd = `OTA_UPDATE|${fullUrl}|${md5Hash || ''}`;
+  // Firmware allocates a 192-byte URL buffer (including NUL).
+  if (Buffer.byteLength(fullUrl, 'utf8') >= 192) return res.status(400).json({ error: 'firmwareUrl too long (max 191 bytes)' });
+  const cmd = `OTA_UPDATE|${fullUrl}|${md5Hash}`;
   const cmdId = String(++state.cmdCounter);
   const envelope = `CMD|${cmdId}|${cmd}`;
   const topics = [`vehicles/${encodeURIComponent(d.id)}/commands`];

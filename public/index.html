@@ -101,6 +101,45 @@
       font-size: 1rem;
       color: var(--muted);
     }
+    /* Refined control-room visual language */
+    :root {
+      --bg: #070b14; --panel: #101725; --panel-2: #151f31; --text: #f3f7fc;
+      --muted: #8492a8; --primary: #5cd6c0; --success: #4ade80;
+      --warning: #fbbf24; --danger: #fb7185; --line: rgba(148,163,184,.14);
+    }
+    body { min-height:100vh; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: radial-gradient(circle at 85% -10%, rgba(45,212,191,.12), transparent 34rem), var(--bg); }
+    .topbar { position:sticky; top:0; z-index:20; padding:18px 28px; background:rgba(7,11,20,.84); backdrop-filter:blur(18px); border-color:var(--line); }
+    .topbar h1 { font-size:1.05rem; letter-spacing:.02em; }
+    #statusText { display:flex; align-items:center; gap:8px; }
+    #statusText::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--success); box-shadow:0 0 12px var(--success); }
+    .stats { padding:24px 28px; gap:12px; }
+    .card { position:relative; overflow:hidden; min-height:108px; padding:18px; border-radius:14px; background:linear-gradient(145deg,rgba(21,31,49,.95),rgba(12,18,30,.95)); border-color:var(--line); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+    .card::after { content:""; position:absolute; inset:auto -20px -45px auto; width:90px; height:90px; border-radius:50%; background:rgba(92,214,192,.08); }
+    .card h3 { font-size:.7rem; }
+    .big { font-size:1.65rem; letter-spacing:-.04em; }
+    .layout { grid-template-columns:280px minmax(0,1fr); gap:18px; padding:0 28px 32px; max-width:1600px; margin:auto; }
+    .sidebar { position:sticky; top:83px; align-self:start; max-height:calc(100vh - 100px); overflow:auto; }
+    .panel { padding:20px; border-radius:14px; border-color:var(--line); background:rgba(16,23,37,.9); box-shadow:0 18px 50px rgba(0,0,0,.14); }
+    .panel h2 { font-size:1.05rem; letter-spacing:-.01em; }
+    .menu button { width:100%; padding:10px 12px; border-radius:9px; font-weight:600; transition:.18s ease; }
+    .menu button:hover,.menu button.active { transform:translateX(2px); background:rgba(92,214,192,.1); color:var(--primary); }
+    .device-item { transition:.18s ease; background:rgba(21,31,49,.7); border-color:var(--line); }
+    .device-item:hover { transform:translateY(-1px); border-color:rgba(92,214,192,.4); }
+    .device-item.active { border-color:var(--primary); box-shadow:inset 3px 0 var(--primary); }
+    input,select,button { min-height:38px; border-color:var(--line); background:#0a111e; outline:none; transition:.16s ease; }
+    input:focus,select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(92,214,192,.12); }
+    button { border:0; background:var(--primary); color:#05201c; }
+    button:hover { filter:brightness(1.08); transform:translateY(-1px); }
+    button:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .meta { min-height:40px; border-color:var(--line); }
+    .meta span { color:var(--muted); }
+    .config-grid { gap:12px; }
+    .field label { font-weight:600; letter-spacing:.01em; }
+    .pair-card { border-color:var(--line); background:rgba(92,214,192,.035); }
+    table { display:block; overflow-x:auto; }
+    thead,tbody { display:table; width:100%; table-layout:auto; }
+    th { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; }
+    .log,.message-log { border:1px solid var(--line); background:#070d17; }
     @media (max-width: 800px) {
       .stats { grid-template-columns: repeat(2, minmax(110px, 1fr)); }
       .layout { grid-template-columns: 1fr; padding: 0 12px 12px; }
@@ -535,7 +574,7 @@
 
       const configDefaults = {
         loopPairs: [{ enabled: true, distance_m: 2.2, sensor1: 0, ch1: 0, sensor2: 1, ch2: 0 }],
-        detector: { min_event_ms: 25, max_event_ms: 5000, enter_thresh: 1.5, exit_ratio: 0.7, exit_hysteresis_cnt: 3, auto_threshold: true, enter_sigma: 4, abs_sigma: 6, confirm_samples: 3, min_samples: 6, peak_ratio: 1.8, enter_hysteresis: 0.7, exit_hysteresis: 0.55, default_speed_kmh: 50 },
+        detector: { min_event_ms: 25, max_event_ms: 5000, enter_thresh: 1.5, exit_ratio: 0.7, exit_hysteresis_cnt: 3, auto_threshold: true, enter_sigma: 4, abs_sigma: 6, confirm_samples: 3, min_event_samples: 6, peak_to_baseline_ratio: 1.8, enter_hysteresis_ratio: 0.7, exit_hysteresis_ratio: 0.55, default_speed_kmh: 50 },
         classification: { motor_max_len: 1.2, car_max_len: 3.8, pickup_max_len: 5.2, van_max_len: 6.5, bus_max_len: 10.5, truck_s_max_len: 12, truck_2_max_len: 15, truck_3_max_len: 18, truck_4_plus_min_len: 20 },
         report: { enabled: true, interval_min: 1, clear_on_report: false },
         rules: { speed_limit_kmh: 60, speed_tolerance_kmh: 5, min_follow_distance_m: 10, min_headway_s: 1.5, max_headway_ms: 5000, min_straddle_overlap_ms: 50, min_straddle_overlap_ratio: 0.2, assume_speed_kmh: 50 },
@@ -585,8 +624,8 @@
         const fields = {
           cfgMinEvent: p.detector.min_event_ms, cfgMaxEvent: p.detector.max_event_ms, cfgEnterThresh: p.detector.enter_thresh,
           cfgExitRatio: p.detector.exit_ratio, cfgExitHystCount: p.detector.exit_hysteresis_cnt, cfgEnterSigma: p.detector.enter_sigma, cfgAbsSigma: p.detector.abs_sigma,
-          cfgConfirmSamples: p.detector.confirm_samples, cfgMinSamples: p.detector.min_samples, cfgPeakRatio: p.detector.peak_ratio,
-          cfgEnterHyst: p.detector.enter_hysteresis, cfgExitHyst: p.detector.exit_hysteresis, cfgDefaultKmh: p.detector.default_speed_kmh,
+          cfgConfirmSamples: p.detector.confirm_samples, cfgMinSamples: p.detector.min_event_samples, cfgPeakRatio: p.detector.peak_to_baseline_ratio,
+          cfgEnterHyst: p.detector.enter_hysteresis_ratio, cfgExitHyst: p.detector.exit_hysteresis_ratio, cfgDefaultKmh: p.detector.default_speed_kmh,
           cfgMotorMax: p.classification.motor_max_len, cfgCarMax: p.classification.car_max_len, cfgPickupMax: p.classification.pickup_max_len,
           cfgVanMax: p.classification.van_max_len, cfgBusMax: p.classification.bus_max_len, cfgTruckSMax: p.classification.truck_s_max_len,
           cfgTruck2Max: p.classification.truck_2_max_len, cfgTruck3Max: p.classification.truck_3_max_len, cfgTruck4Min: p.classification.truck_4_plus_min_len,
@@ -619,7 +658,7 @@
         const n = (id) => Number(document.getElementById(id).value);
         return {
           loopPairs: pairs,
-          detector: { min_event_ms: n('cfgMinEvent'), max_event_ms: n('cfgMaxEvent'), enter_thresh: n('cfgEnterThresh'), exit_ratio: n('cfgExitRatio'), exit_hysteresis_cnt: n('cfgExitHystCount'), auto_threshold: document.getElementById('cfgAutoThreshold').value === '1', enter_sigma: n('cfgEnterSigma'), abs_sigma: n('cfgAbsSigma'), confirm_samples: n('cfgConfirmSamples'), min_samples: n('cfgMinSamples'), peak_ratio: n('cfgPeakRatio'), enter_hysteresis: n('cfgEnterHyst'), exit_hysteresis: n('cfgExitHyst'), default_speed_kmh: n('cfgDefaultKmh') },
+          detector: { min_event_ms: n('cfgMinEvent'), max_event_ms: n('cfgMaxEvent'), enter_thresh: n('cfgEnterThresh'), exit_ratio: n('cfgExitRatio'), exit_hysteresis_cnt: n('cfgExitHystCount'), auto_threshold: document.getElementById('cfgAutoThreshold').value === '1', enter_sigma: n('cfgEnterSigma'), abs_sigma: n('cfgAbsSigma'), confirm_samples: n('cfgConfirmSamples'), min_event_samples: n('cfgMinSamples'), peak_to_baseline_ratio: n('cfgPeakRatio'), enter_hysteresis_ratio: n('cfgEnterHyst'), exit_hysteresis_ratio: n('cfgExitHyst'), default_speed_kmh: n('cfgDefaultKmh') },
           classification: Object.fromEntries([['motor_max_len','cfgMotorMax'],['car_max_len','cfgCarMax'],['pickup_max_len','cfgPickupMax'],['van_max_len','cfgVanMax'],['bus_max_len','cfgBusMax'],['truck_s_max_len','cfgTruckSMax'],['truck_2_max_len','cfgTruck2Max'],['truck_3_max_len','cfgTruck3Max'],['truck_4_plus_min_len','cfgTruck4Min'],['peak_prominence_ratio','cfgProminence'],['min_axle_distance_ms','cfgAxleMs'],['rise_short_ms','cfgRiseShort'],['rise_mid_ms','cfgRiseMid'],['rise_long_ms','cfgRiseLong'],['energy_low','cfgEnergyLow'],['energy_mid','cfgEnergyMid'],['energy_high','cfgEnergyHigh'],['crest_spiky','cfgCrestSpiky'],['crest_broad','cfgCrestBroad'],['skew_tol','cfgSkewTol'],['skew_high','cfgSkewHigh'],['com_min','cfgComMin'],['com_max','cfgComMax'],['width_mid','cfgWidthMid'],['width_wide','cfgWidthWide'],['std_high','cfgStdHigh'],['std_low','cfgStdLow']].map(([key,id]) => [key, document.getElementById(id).value === '' ? null : n(id)])),
           rules: { speed_limit_kmh: n('cfgRuleLimit'), speed_tolerance_kmh: n('cfgRuleTolerance'), min_follow_distance_m: n('cfgRuleMinDistance'), min_headway_s: n('cfgRuleMinHeadway'), max_headway_ms: n('cfgRuleMaxHeadway'), min_straddle_overlap_ms: n('cfgRuleStraddleMs'), min_straddle_overlap_ratio: n('cfgRuleStraddleRatio'), assume_speed_kmh: n('cfgRuleAssumeKmh') },
           sensorLC: Array.from({ length: 8 }, (_, i) => ({ sensor: Math.floor(i / 4), channel: i % 4, l: document.getElementById(`cfgLc${i}L`).value === '' ? null : n(`cfgLc${i}L`), c: document.getElementById(`cfgLc${i}C`).value === '' ? null : n(`cfgLc${i}C`) })),
@@ -648,7 +687,7 @@
         sendBoardCommand(`SET_THRESHOLD|exit_ratio|${cfg.detector.exit_ratio}`);
         sendBoardCommand(`SET_THRESHOLD|hysteresis|${cfg.detector.exit_hysteresis_cnt}`);
         sendBoardCommand(`SET_AUTO_THRESH|${cfg.detector.auto_threshold ? 1 : 0}|${cfg.detector.enter_sigma}|${cfg.detector.abs_sigma}`);
-        sendBoardCommand(`SET_DETECTOR|${cfg.detector.confirm_samples}|${cfg.detector.min_samples}|${cfg.detector.peak_ratio}|${cfg.detector.enter_hysteresis}|${cfg.detector.exit_hysteresis}`);
+        sendBoardCommand(`SET_DETECTOR|${cfg.detector.confirm_samples}|${cfg.detector.min_event_samples}|${cfg.detector.peak_to_baseline_ratio}|${cfg.detector.enter_hysteresis_ratio}|${cfg.detector.exit_hysteresis_ratio}`);
         sendBoardCommand(`SET_EVENT_RANGE|${cfg.detector.min_event_ms}|${cfg.detector.max_event_ms}`);
         const classKeys = ['motor_max_len','car_max_len','pickup_max_len','van_max_len','bus_max_len','truck_s_max_len','truck_2_max_len','truck_3_max_len','truck_4_plus_min_len','peak_prominence_ratio','min_axle_distance_ms','rise_short_ms','rise_mid_ms','rise_long_ms','energy_low','energy_mid','energy_high','crest_spiky','crest_broad','skew_tol','skew_high','com_min','com_max','width_mid','width_wide','std_high','std_low'];
         const classValues = classKeys.map((key) => cfg.classification[key]);
@@ -734,7 +773,8 @@
       }
 
       function connectWS() {
-        const ws = new WebSocket(`ws://${location.host}/ws`);
+        const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${wsProtocol}//${location.host}/ws`);
         state.ws = ws;
         ws.onopen = () => {
           document.getElementById('statusText').textContent = 'Connected';
@@ -799,6 +839,7 @@
       function refreshFirmwareList() {
         fetch('/api/firmware').then((r) => r.json()).then((data) => {
           firmwareFiles = data.files || [];
+          firmwareMd5Map = Object.fromEntries(firmwareFiles.map((file) => [file.name, file.md5 || '']));
           renderFirmwareList();
           updateOTASelect();
         }).catch((err) => {

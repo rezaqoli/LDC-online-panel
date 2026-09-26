@@ -91,6 +91,7 @@ test('configuration replies merge into a dashboard profile', () => {
   assert.equal(profile.detector.enter_thresh, 1.25);
   assert.equal(profile.detector.exit_hysteresis_cnt, 4);
   assert.equal(profile.detector.auto_threshold, true);
+  assert.equal(profile.detector.default_speed_kmh, 45);
   assert.equal(profile.classification.rise_short_ms, 20);
   assert.deepEqual(profile.loopPairs[0], { enabled: true, distance_m: 2.5, sensor1: 0, ch1: 1, sensor2: 1, ch2: 2 });
 
@@ -101,4 +102,12 @@ test('configuration replies merge into a dashboard profile', () => {
   profile = applyConfigurationReply(profile, 'SENSOR_LC|s0c0:100.500|2.250|120|15|s1c3:99.000|3.000|130|16');
   assert.equal(profile.sensorLC[0].l, 100.5);
   assert.equal(profile.sensorLC[7].driver_current, 16);
+
+  profile = applyConfigurationReply(profile, 'CONFIG|confirm:5|min_samples:8|peak_ratio:1.9|enter_hyst:0.8|exit_hyst:0.6|entry_mode:derivative');
+  assert.equal(profile.detector.min_event_samples, 8);
+  assert.equal(profile.detector.peak_to_baseline_ratio, 1.9);
+  assert.equal(profile.detector.enter_hysteresis_ratio, 0.8);
+  assert.equal(profile.detector.entry_mode, 'derivative');
+  // A partial CONFIG reply must not erase the existing loop pair.
+  assert.equal(profile.loopPairs[0].distance_m, 2.5);
 });
