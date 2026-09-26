@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LDC Fleet Dashboard</title>
+  <title>داشبورد ناوگان آشکارساز خودرو LDC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #0b1020;
@@ -145,12 +148,33 @@
       .layout { grid-template-columns: 1fr; padding: 0 12px 12px; }
       .config-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
     }
+    /* ===== Persian (fa) / RTL adjustments ===== */
+    html { direction: rtl; }
+    body {
+      font-family: Vazirmatn, Vazir, Tahoma, 'Segoe UI', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      line-height: 1.65;
+    }
+    input, select, button, .field label { font-family: inherit; }
+    /* letter-spacing breaks the joined Arabic-script letters — disable it everywhere */
+    .topbar h1, .panel h2, .card h3, th, .big, .menu button, .field label { letter-spacing: 0; }
+    .card h3, th { text-transform: none; font-size: .74rem; }
+    .menu button { text-align: right; }
+    .menu button:hover, .menu button.active { transform: translateX(-2px); }
+    .device-item.active { box-shadow: inset -3px 0 var(--primary); }
+    th, td { text-align: right; }
+    .card::after { inset: auto auto -45px -20px; }
+    /* Raw protocol logs stay LTR so payloads/topics read naturally */
+    .log, .message-log { direction: ltr; text-align: left; }
+    /* Persian-led logs: per-line direction follows the first strong character */
+    #commandLog, #otaStatus { direction: rtl; text-align: right; unicode-bidi: plaintext; font-family: inherit; }
+    .ltr { direction: ltr; unicode-bidi: isolate; }
+    .broadcast { flex-wrap: wrap; }
   </style>
 </head>
 <body>
   <div class="topbar">
-    <h1>Vehicle Detector Fleet Dashboard</h1>
-    <div class="small" id="statusText">Connecting…</div>
+    <h1>داشبورد ناوگان آشکارساز خودرو LDC</h1>
+    <div class="small" id="statusText">در حال اتصال…</div>
   </div>
 
   <div class="stats" id="statsGrid"></div>
@@ -158,56 +182,56 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="panel">
-        <h2>Workspace</h2>
-        <nav class="menu" aria-label="Dashboard sections">
-          <button class="active" data-section="overview">◉ Overview</button>
-          <button data-section="console">⌘ Console &amp; Activity</button>
-          <button data-section="firmware">⬆ Firmware &amp; OTA</button>
-          <button data-section="loop">⇄ Loop Pairs</button>
-          <button data-section="detector">◈ Detector &amp; Thresholds</button>
-          <button data-section="classification">▦ Vehicle Classification</button>
-          <button data-section="sensors">⌁ Sensor LC</button>
-          <button data-section="reporting">⚙ Reporting &amp; MQTT</button>
+        <h2>فضای کاری</h2>
+        <nav class="menu" aria-label="بخش‌های داشبورد">
+          <button class="active" data-section="overview">◉ نمای کلی</button>
+          <button data-section="console">⌘ کنسول و فعالیت</button>
+          <button data-section="firmware">⬆ میان‌افزار و OTA</button>
+          <button data-section="loop">⇄ جفت‌های حلقه</button>
+          <button data-section="detector">◈ آشکارساز و آستانه‌ها</button>
+          <button data-section="classification">▦ طبقه‌بندی خودرو</button>
+          <button data-section="sensors">⌁ سنسور L/C</button>
+          <button data-section="reporting">⚙ گزارش‌دهی و MQTT</button>
         </nav>
       </div>
       <div class="panel">
-        <h2>Boards</h2>
+        <h2>برد‌ها</h2>
         <div id="deviceList" class="device-list"></div>
       </div>
     </aside>
 
     <main class="main">
       <div class="panel section" data-section-content="overview">
-        <h2 id="selectedDeviceTitle">Board Overview</h2>
+        <h2 id="selectedDeviceTitle">نمای کلی برد</h2>
         <div class="grid2">
           <div>
-            <div class="meta"><span>Battery</span><strong id="batteryValue">—</strong></div>
-            <div class="meta"><span>Solar</span><strong id="solarValue">—</strong></div>
-            <div class="meta"><span>Signal</span><strong id="signalValue">—</strong></div>
-            <div class="meta"><span>Last Seen</span><strong id="lastSeenValue">—</strong></div>
+            <div class="meta"><span>باتری</span><strong id="batteryValue">—</strong></div>
+            <div class="meta"><span>پنل خورشیدی</span><strong id="solarValue">—</strong></div>
+            <div class="meta"><span>قدرت سیگنال</span><strong id="signalValue">—</strong></div>
+            <div class="meta"><span>آخرین فعالیت</span><strong id="lastSeenValue">—</strong></div>
           </div>
           <div>
-            <div class="meta"><span>Status</span><strong id="statusValue">—</strong></div>
-            <div class="meta"><span>Name</span><strong id="nameValue">—</strong></div>
-            <div class="meta"><span>Board ID</span><strong id="boardIdValue">—</strong></div>
-            <div class="meta"><span>Loop Pairs</span><strong id="loopPairsValue">—</strong></div>
-            <div class="meta"><span>Vehicle Class</span><strong id="classValue">—</strong></div>
+            <div class="meta"><span>وضعیت</span><strong id="statusValue">—</strong></div>
+            <div class="meta"><span>نام</span><strong id="nameValue">—</strong></div>
+            <div class="meta"><span>شناسه برد</span><strong id="boardIdValue" dir="ltr">—</strong></div>
+            <div class="meta"><span>جفت‌های حلقه</span><strong id="loopPairsValue" dir="ltr">—</strong></div>
+            <div class="meta"><span>طبقه‌بندی خودرو</span><strong id="classValue" dir="ltr">—</strong></div>
           </div>
         </div>
         <div class="controls" style="margin-top:14px;">
-          <input id="deviceNameInput" placeholder="Board friendly name" />
-          <button onclick="saveDeviceName()">Save Name</button>
-          <button onclick="refreshDevices()">Refresh</button>
+          <input id="deviceNameInput" placeholder="نام دلخواه برد" />
+          <button onclick="saveDeviceName()">ذخیره نام</button>
+          <button onclick="refreshDevices()">بازخوانی</button>
         </div>
       </div>
 
       <!-- MERGED: Command Console + Activity -->
       <div class="panel section hidden" data-section-content="console">
-        <h2>Command Console &amp; Activity</h2>
+        <h2>کنسول فرمان و فعالیت</h2>
 
         <!-- Command console top -->
         <div class="console-row">
-          <input id="commandPreset" list="commandPresets" value="GET_STATUS" placeholder="Type any ESP command" />
+          <input id="commandPreset" list="commandPresets" value="GET_STATUS" placeholder="هر فرمان ESP را وارد کنید" />
           <datalist id="commandPresets">
             <option value="GET_STATUS">GET_STATUS</option>
             <option value="GET_CONFIG">GET_CONFIG</option>
@@ -229,45 +253,45 @@
             <option value="CALIBRATE">CALIBRATE</option>
             <option value="RESET_STATS">RESET_STATS</option>
           </datalist>
-          <button onclick="sendSelectedCommand()">Send Command</button>
+          <button onclick="sendSelectedCommand()">ارسال فرمان</button>
         </div>
-        <label class="broadcast"><input id="commandBroadcast" type="checkbox" /> Also send to all boards (<code>vehicles/commands</code>)</label>
-        <div class="small" id="commandTargetHint">Target: selected board only</div>
+        <label class="broadcast"><input id="commandBroadcast" type="checkbox" /> ارسال هم‌زمان به همهٔ برد‌ها (<code>vehicles/commands</code>)</label>
+        <div class="small" id="commandTargetHint">مقصد: فقط برد انتخاب‌شده</div>
         <div class="log" id="commandLog"></div>
 
         <!-- Activity subsections -->
         <div class="activity-subsection">
-          <h3>Command / Reply Log</h3>
+          <h3>گزارش فرمان و پاسخ</h3>
           <table>
             <thead>
-              <tr><th>Time</th><th>Cmd</th><th>Command</th><th>Status</th><th>Reply</th></tr>
+              <tr><th>زمان</th><th>شناسه</th><th>فرمان</th><th>وضعیت</th><th>پاسخ</th></tr>
             </thead>
             <tbody id="commandReplyTable"></tbody>
           </table>
         </div>
 
         <div class="activity-subsection">
-          <h3>Live MQTT Message Log</h3>
+          <h3>گزارش زندهٔ پیام‌های MQTT</h3>
           <div class="controls" style="margin-bottom:10px;">
-            <select id="messageFilter" aria-label="Message direction filter">
-              <option value="all">All messages</option>
-              <option value="in">Received from boards</option>
-              <option value="out">Sent to boards</option>
-              <option value="err">Errors</option>
-              <option value="sys">System</option>
+            <select id="messageFilter" aria-label="پالایهٔ جهت پیام‌ها">
+              <option value="all">همهٔ پیام‌ها</option>
+              <option value="in">دریافتی از برد‌ها</option>
+              <option value="out">ارسالی به برد‌ها</option>
+              <option value="err">خطاها</option>
+              <option value="sys">سیستم</option>
             </select>
-            <input id="messageSearch" placeholder="Search topic or payload" />
-            <label class="small"><input id="messageAutoScroll" type="checkbox" checked /> Auto-scroll</label>
-            <button type="button" onclick="clearMessageLog()">Clear Log</button>
+            <input id="messageSearch" placeholder="جستجو در تاپیک یا محتوا" />
+            <label class="small"><input id="messageAutoScroll" type="checkbox" checked /> پیمایش خودکار</label>
+            <button type="button" onclick="clearMessageLog()">پاک‌کردن گزارش</button>
           </div>
           <div class="message-log" id="messageLog" role="log" aria-live="polite"></div>
         </div>
 
         <div class="activity-subsection">
-          <h3>Recent Events</h3>
+          <h3>رویدادهای اخیر</h3>
           <table>
             <thead>
-              <tr><th>Time</th><th>Type</th><th>Device</th><th>Details</th></tr>
+              <tr><th>زمان</th><th>نوع</th><th>دستگاه</th><th>جزئیات</th></tr>
             </thead>
             <tbody id="eventsTable"></tbody>
           </table>
@@ -275,144 +299,144 @@
       </div>
 
       <div class="panel section hidden" data-section-content="config">
-        <h2>Board Configuration</h2>
-        <p class="small">Edit the selected board profile, save it in the dashboard, or send the matching commands to the ESP.</p>
+        <h2>پیکربندی برد</h2>
+        <p class="small">پروفایل برد انتخاب‌شده را ویرایش کنید، در داشبورد ذخیره کنید یا فرمان‌های متناظر را به ESP ارسال کنید.</p>
         <div class="config-section section" data-section-content="loop">
-          <h3>Loop Pairs</h3>
+          <h3>جفت‌های حلقه</h3>
           <div id="loopConfigRows"></div>
         </div>
         <div class="config-section section hidden" data-section-content="detector">
-          <h3>Detector and Thresholds</h3>
+          <h3>آشکارساز و آستانه‌ها</h3>
           <div class="config-grid">
-            <div class="field"><label>Min event (ms)</label><input id="cfgMinEvent" type="number" step="1"></div>
-            <div class="field"><label>Max event (ms)</label><input id="cfgMaxEvent" type="number" step="1"></div>
-            <div class="field"><label>Enter threshold</label><input id="cfgEnterThresh" type="number" step="0.01"></div>
-            <div class="field"><label>Exit ratio</label><input id="cfgExitRatio" type="number" step="0.01"></div>
-            <div class="field"><label>Exit hysteresis count</label><input id="cfgExitHystCount" type="number" min="0" step="1"></div>
-            <div class="field"><label>Auto threshold</label><select id="cfgAutoThreshold"><option value="1">ON</option><option value="0">OFF</option></select></div>
-            <div class="field"><label>Enter sigma</label><input id="cfgEnterSigma" type="number" step="0.1"></div>
-            <div class="field"><label>Absolute sigma</label><input id="cfgAbsSigma" type="number" step="0.1"></div>
-            <div class="field"><label>Confirm samples</label><input id="cfgConfirmSamples" type="number" min="1" step="1" value="3"></div>
-            <div class="field"><label>Minimum samples</label><input id="cfgMinSamples" type="number" min="1" step="1" value="6"></div>
-            <div class="field"><label>Peak / baseline ratio</label><input id="cfgPeakRatio" type="number" min="0.01" step="0.01" value="1.8"></div>
-            <div class="field"><label>Enter hysteresis</label><input id="cfgEnterHyst" type="number" min="0.01" step="0.01" value="0.7"></div>
-            <div class="field"><label>Exit hysteresis</label><input id="cfgExitHyst" type="number" min="0.01" step="0.01" value="0.55"></div>
-            <div class="field"><label>Default speed (km/h)</label><input id="cfgDefaultKmh" type="number" min="0" step="0.1"></div>
+            <div class="field"><label>حداقل رویداد (میلی‌ثانیه)</label><input id="cfgMinEvent" type="number" step="1"></div>
+            <div class="field"><label>حداکثر رویداد (میلی‌ثانیه)</label><input id="cfgMaxEvent" type="number" step="1"></div>
+            <div class="field"><label>آستانهٔ ورود</label><input id="cfgEnterThresh" type="number" step="0.01"></div>
+            <div class="field"><label>نسبت خروج</label><input id="cfgExitRatio" type="number" step="0.01"></div>
+            <div class="field"><label>تعداد هیسترزیس خروج</label><input id="cfgExitHystCount" type="number" min="0" step="1"></div>
+            <div class="field"><label>آستانهٔ خودکار</label><select id="cfgAutoThreshold"><option value="1">روشن</option><option value="0">خاموش</option></select></div>
+            <div class="field"><label>سیگمای ورود</label><input id="cfgEnterSigma" type="number" step="0.1"></div>
+            <div class="field"><label>سیگمای مطلق</label><input id="cfgAbsSigma" type="number" step="0.1"></div>
+            <div class="field"><label>نمونه‌های تأیید</label><input id="cfgConfirmSamples" type="number" min="1" step="1" value="3"></div>
+            <div class="field"><label>حداقل نمونه‌ها</label><input id="cfgMinSamples" type="number" min="1" step="1" value="6"></div>
+            <div class="field"><label>نسبت پیک به مبنا</label><input id="cfgPeakRatio" type="number" min="0.01" step="0.01" value="1.8"></div>
+            <div class="field"><label>هیسترزیس ورود</label><input id="cfgEnterHyst" type="number" min="0.01" step="0.01" value="0.7"></div>
+            <div class="field"><label>هیسترزیس خروج</label><input id="cfgExitHyst" type="number" min="0.01" step="0.01" value="0.55"></div>
+            <div class="field"><label>سرعت پیش‌فرض (کیلومتر بر ساعت)</label><input id="cfgDefaultKmh" type="number" min="0" step="0.1"></div>
           </div>
         </div>
         <div class="config-section section hidden" data-section-content="classification">
-          <h3>Vehicle Classification Lengths (m)</h3>
+          <h3>طول‌های طبقه‌بندی خودرو (متر)</h3>
           <div class="config-grid">
-            <div class="field"><label>Motor max</label><input id="cfgMotorMax" type="number" step="0.1"></div>
-            <div class="field"><label>Car max</label><input id="cfgCarMax" type="number" step="0.1"></div>
-            <div class="field"><label>Pickup max</label><input id="cfgPickupMax" type="number" step="0.1"></div>
-            <div class="field"><label>Van max</label><input id="cfgVanMax" type="number" step="0.1"></div>
-            <div class="field"><label>Bus max</label><input id="cfgBusMax" type="number" step="0.1"></div>
-            <div class="field"><label>Truck S max</label><input id="cfgTruckSMax" type="number" step="0.1"></div>
-            <div class="field"><label>Truck 2 max</label><input id="cfgTruck2Max" type="number" step="0.1"></div>
-            <div class="field"><label>Truck 3 max</label><input id="cfgTruck3Max" type="number" step="0.1"></div>
-            <div class="field"><label>Truck 4+ min</label><input id="cfgTruck4Min" type="number" step="0.1"></div>
-            <div class="field"><label>Peak prominence</label><input id="cfgProminence" type="number" step="0.01"></div>
-            <div class="field"><label>Min axle distance (ms)</label><input id="cfgAxleMs" type="number" step="0.1"></div>
-            <div class="field"><label>Rise short (ms)</label><input id="cfgRiseShort" type="number" step="0.1"></div>
-            <div class="field"><label>Rise mid (ms)</label><input id="cfgRiseMid" type="number" step="0.1"></div>
-            <div class="field"><label>Rise long (ms)</label><input id="cfgRiseLong" type="number" step="0.1"></div>
-            <div class="field"><label>Energy low</label><input id="cfgEnergyLow" type="number" step="0.000001"></div>
-            <div class="field"><label>Energy mid</label><input id="cfgEnergyMid" type="number" step="0.000001"></div>
-            <div class="field"><label>Energy high</label><input id="cfgEnergyHigh" type="number" step="0.000001"></div>
-            <div class="field"><label>Crest spiky</label><input id="cfgCrestSpiky" type="number" step="0.01"></div>
-            <div class="field"><label>Crest broad</label><input id="cfgCrestBroad" type="number" step="0.01"></div>
-            <div class="field"><label>Skew tolerance</label><input id="cfgSkewTol" type="number" step="0.01"></div>
-            <div class="field"><label>Skew high</label><input id="cfgSkewHigh" type="number" step="0.01"></div>
-            <div class="field"><label>COM min</label><input id="cfgComMin" type="number" step="0.01"></div>
-            <div class="field"><label>COM max</label><input id="cfgComMax" type="number" step="0.01"></div>
-            <div class="field"><label>Width medium</label><input id="cfgWidthMid" type="number" step="0.01"></div>
-            <div class="field"><label>Width wide</label><input id="cfgWidthWide" type="number" step="0.01"></div>
-            <div class="field"><label>Std peak high</label><input id="cfgStdHigh" type="number" step="0.01"></div>
-            <div class="field"><label>Std peak low</label><input id="cfgStdLow" type="number" step="0.01"></div>
+            <div class="field"><label>حداکثر موتورسیکلت</label><input id="cfgMotorMax" type="number" step="0.1"></div>
+            <div class="field"><label>حداکثر سواری</label><input id="cfgCarMax" type="number" step="0.1"></div>
+            <div class="field"><label>حداکثر وانت</label><input id="cfgPickupMax" type="number" step="0.1"></div>
+            <div class="field"><label>حداکثر ون</label><input id="cfgVanMax" type="number" step="0.1"></div>
+            <div class="field"><label>حداکثر اتوبوس</label><input id="cfgBusMax" type="number" step="0.1"></div>
+            <div class="field"><label>حداکثر کامیون کوچک</label><input id="cfgTruckSMax" type="number" step="0.1"></div>
+            <div class="field"><label>حداکثر کامیون ۲ محور</label><input id="cfgTruck2Max" type="number" step="0.1"></div>
+            <div class="field"><label>حداکثر کامیون ۳ محور</label><input id="cfgTruck3Max" type="number" step="0.1"></div>
+            <div class="field"><label>حداقل کامیون +۴ محور</label><input id="cfgTruck4Min" type="number" step="0.1"></div>
+            <div class="field"><label>برجستگی پیک</label><input id="cfgProminence" type="number" step="0.01"></div>
+            <div class="field"><label>حداقل فاصلهٔ محور (میلی‌ثانیه)</label><input id="cfgAxleMs" type="number" step="0.1"></div>
+            <div class="field"><label>صعود کوتاه (میلی‌ثانیه)</label><input id="cfgRiseShort" type="number" step="0.1"></div>
+            <div class="field"><label>صعود متوسط (میلی‌ثانیه)</label><input id="cfgRiseMid" type="number" step="0.1"></div>
+            <div class="field"><label>صعود بلند (میلی‌ثانیه)</label><input id="cfgRiseLong" type="number" step="0.1"></div>
+            <div class="field"><label>انرژی کم</label><input id="cfgEnergyLow" type="number" step="0.000001"></div>
+            <div class="field"><label>انرژی متوسط</label><input id="cfgEnergyMid" type="number" step="0.000001"></div>
+            <div class="field"><label>انرژی زیاد</label><input id="cfgEnergyHigh" type="number" step="0.000001"></div>
+            <div class="field"><label>قلهٔ تیز</label><input id="cfgCrestSpiky" type="number" step="0.01"></div>
+            <div class="field"><label>قلهٔ پهن</label><input id="cfgCrestBroad" type="number" step="0.01"></div>
+            <div class="field"><label>تلورانس چولگی</label><input id="cfgSkewTol" type="number" step="0.01"></div>
+            <div class="field"><label>چولگی زیاد</label><input id="cfgSkewHigh" type="number" step="0.01"></div>
+            <div class="field"><label>حداقل مرکز جرم</label><input id="cfgComMin" type="number" step="0.01"></div>
+            <div class="field"><label>حداکثر مرکز جرم</label><input id="cfgComMax" type="number" step="0.01"></div>
+            <div class="field"><label>عرض متوسط</label><input id="cfgWidthMid" type="number" step="0.01"></div>
+            <div class="field"><label>عرض پهن</label><input id="cfgWidthWide" type="number" step="0.01"></div>
+            <div class="field"><label>انحراف معیار پیک — بالا</label><input id="cfgStdHigh" type="number" step="0.01"></div>
+            <div class="field"><label>انحراف معیار پیک — پایین</label><input id="cfgStdLow" type="number" step="0.01"></div>
           </div>
         </div>
         <div class="config-section section hidden" data-section-content="sensors">
-          <h3>Sensor LC Channels</h3>
-          <p class="small">L and C are writable. Conversion time and driver current are read-only values reported by the ESP.</p>
+          <h3>کانال‌های سنسور L-C</h3>
+          <p class="small">مقادیر L و C قابل ویرایش‌اند. زمان تبدیل و جریان درایور مقادیری فقط‌خواندنی هستند که از سمت ESP گزارش می‌شوند.</p>
           <div id="sensorLcRows" class="config-grid"></div>
         </div>
         <div class="config-section section hidden" data-section-content="firmware">
-          <h2>Firmware & OTA Update</h2>
-          
+          <h2>میان‌افزار و به‌روزرسانی OTA</h2>
+
           <!-- Upload Firmware -->
           <div class="panel" style="margin-bottom: 20px;">
-            <h3>Upload Firmware (.bin)</h3>
+            <h3>بارگذاری میان‌افزار (.bin)</h3>
             <div class="controls">
               <input type="file" id="firmwareFileInput" accept=".bin" />
-              <button onclick="uploadFirmware()">Upload</button>
+              <button onclick="uploadFirmware()">بارگذاری</button>
             </div>
             <div id="firmwareUploadStatus" class="small" style="margin-top: 8px;"></div>
           </div>
 
           <!-- Available Firmware Files -->
           <div class="panel" style="margin-bottom: 20px;">
-            <h3>Available Firmware Files</h3>
+            <h3>فایل‌های میان‌افزار موجود</h3>
             <div id="firmwareList" style="max-height: 200px; overflow-y: auto;"></div>
-            <button onclick="refreshFirmwareList()" style="margin-top: 10px;">Refresh List</button>
+            <button onclick="refreshFirmwareList()" style="margin-top: 10px;">بازخوانی فهرست</button>
           </div>
 
           <!-- OTA Update -->
           <div class="panel">
-            <h3>Trigger OTA Update</h3>
+            <h3>اجرای به‌روزرسانی OTA</h3>
             <div class="field">
-              <label>Select Firmware</label>
+              <label>انتخاب میان‌افزار</label>
               <select id="otaFirmwareSelect">
-                <option value="">-- Select a firmware file --</option>
+                <option value="">— یک فایل میان‌افزار انتخاب کنید —</option>
               </select>
             </div>
             <div class="field">
-              <label>MD5 Hash (optional but recommended)</label>
-              <input id="otaMd5Input" type="text" placeholder="Auto-filled from selected file" readonly />
+              <label>هش MD5 (اختیاری ولی توصیه می‌شود)</label>
+              <input id="otaMd5Input" type="text" placeholder="به‌صورت خودکار از فایل انتخاب‌شده پر می‌شود" readonly />
             </div>
             <div class="field">
-              <label>Firmware URL</label>
-              <input id="otaUrlInput" type="text" placeholder="Auto-filled from selected file" />
+              <label>آدرس میان‌افزار (URL)</label>
+              <input id="otaUrlInput" type="text" placeholder="به‌صورت خودکار از فایل انتخاب‌شده پر می‌شود" />
             </div>
             <div class="controls" style="margin-top: 14px;">
-              <button onclick="triggerOTA()" style="background: var(--warning);">Start OTA Update</button>
-              <button onclick="clearOTAForm()">Clear</button>
+              <button onclick="triggerOTA()" style="background: var(--warning);">شروع به‌روزرسانی OTA</button>
+              <button onclick="clearOTAForm()">پاک‌کردن</button>
             </div>
             <div id="otaStatus" class="log" style="margin-top: 14px; max-height: 200px;"></div>
           </div>
         </div>
         <div class="config-section section hidden" data-section-content="reporting">
-          <h3>Reporting and MQTT</h3>
+          <h3>گزارش‌دهی و MQTT</h3>
           <div class="config-grid">
-            <div class="field"><label>Speed limit (km/h)</label><input id="cfgRuleLimit" type="number" step="0.1"></div>
-            <div class="field"><label>Speed tolerance</label><input id="cfgRuleTolerance" type="number" step="0.1"></div>
-            <div class="field"><label>Min following distance (m)</label><input id="cfgRuleMinDistance" type="number" step="0.1"></div>
-            <div class="field"><label>Min headway (s)</label><input id="cfgRuleMinHeadway" type="number" step="0.01"></div>
-            <div class="field"><label>Max headway (ms)</label><input id="cfgRuleMaxHeadway" type="number" step="1"></div>
-            <div class="field"><label>Straddle overlap (ms)</label><input id="cfgRuleStraddleMs" type="number" step="1"></div>
-            <div class="field"><label>Straddle ratio</label><input id="cfgRuleStraddleRatio" type="number" step="0.01"></div>
-            <div class="field"><label>Assumed speed (km/h)</label><input id="cfgRuleAssumeKmh" type="number" step="0.1"></div>
-            <div class="field"><label>Report interval (min)</label><input id="cfgReportInterval" type="number" min="0" step="1"></div>
-            <div class="field"><label>Auto report</label><select id="cfgReportEnabled"><option value="1">ON</option><option value="0">OFF</option></select></div>
-            <div class="field"><label>Clear on report</label><select id="cfgClearReport"><option value="1">YES</option><option value="0">NO</option></select></div>
-            <div class="field"><label>MQTT client ID</label><input id="cfgMqttId" type="text"></div>
-            <div class="field"><label>MQTT server</label><input id="cfgMqttServer" type="text"></div>
-            <div class="field"><label>MQTT fallback IP</label><input id="cfgMqttIp" type="text" placeholder="0.0.0.0"></div>
-            <div class="field"><label>MQTT port</label><input id="cfgMqttPort" type="number" step="1"></div>
-            <div class="field"><label>MQTT user</label><input id="cfgMqttUser" type="text"></div>
-            <div class="field"><label>MQTT password</label><input id="cfgMqttPass" type="password"></div>
-            <div class="field"><label>Cellular APN</label><input id="cfgMqttApn" type="text"></div>
-            <div class="field"><label>MQTT events topic</label><input id="cfgMqttEvents" type="text"></div>
-            <div class="field"><label>MQTT commands topic</label><input id="cfgMqttCommands" type="text"></div>
-            <div class="field"><label>MQTT responses topic</label><input id="cfgMqttResponses" type="text"></div>
+            <div class="field"><label>حد سرعت (کیلومتر بر ساعت)</label><input id="cfgRuleLimit" type="number" step="0.1"></div>
+            <div class="field"><label>تلورانس سرعت</label><input id="cfgRuleTolerance" type="number" step="0.1"></div>
+            <div class="field"><label>حداقل فاصلهٔ پیروی (متر)</label><input id="cfgRuleMinDistance" type="number" step="0.1"></div>
+            <div class="field"><label>حداقل فاصلهٔ زمانی (ثانیه)</label><input id="cfgRuleMinHeadway" type="number" step="0.01"></div>
+            <div class="field"><label>حداکثر فاصلهٔ زمانی (میلی‌ثانیه)</label><input id="cfgRuleMaxHeadway" type="number" step="1"></div>
+            <div class="field"><label>هم‌پوشانی (میلی‌ثانیه)</label><input id="cfgRuleStraddleMs" type="number" step="1"></div>
+            <div class="field"><label>نسبت هم‌پوشانی</label><input id="cfgRuleStraddleRatio" type="number" step="0.01"></div>
+            <div class="field"><label>سرعت فرضی (کیلومتر بر ساعت)</label><input id="cfgRuleAssumeKmh" type="number" step="0.1"></div>
+            <div class="field"><label>بازهٔ گزارش (دقیقه)</label><input id="cfgReportInterval" type="number" min="0" step="1"></div>
+            <div class="field"><label>گزارش خودکار</label><select id="cfgReportEnabled"><option value="1">روشن</option><option value="0">خاموش</option></select></div>
+            <div class="field"><label>پاک‌سازی پس از گزارش</label><select id="cfgClearReport"><option value="1">بله</option><option value="0">خیر</option></select></div>
+            <div class="field"><label>شناسهٔ کلاینت MQTT</label><input id="cfgMqttId" type="text"></div>
+            <div class="field"><label>سرور MQTT</label><input id="cfgMqttServer" type="text"></div>
+            <div class="field"><label>IP جایگزین MQTT</label><input id="cfgMqttIp" type="text" placeholder="0.0.0.0"></div>
+            <div class="field"><label>پورت MQTT</label><input id="cfgMqttPort" type="number" step="1"></div>
+            <div class="field"><label>نام کاربری MQTT</label><input id="cfgMqttUser" type="text"></div>
+            <div class="field"><label>گذرواژهٔ MQTT</label><input id="cfgMqttPass" type="password"></div>
+            <div class="field"><label>APN سیم‌کارت</label><input id="cfgMqttApn" type="text"></div>
+            <div class="field"><label>تاپیک رویدادها</label><input id="cfgMqttEvents" type="text"></div>
+            <div class="field"><label>تاپیک فرمان‌ها</label><input id="cfgMqttCommands" type="text"></div>
+            <div class="field"><label>تاپیک پاسخ‌ها</label><input id="cfgMqttResponses" type="text"></div>
           </div>
         </div>
         <div class="config-actions">
-          <button onclick="saveBoardProfile()">Save Dashboard Profile</button>
-          <button onclick="sendBoardConfiguration()">Send Configuration to ESP</button>
-          <button onclick="receiveBoardConfiguration()">Read Configuration from ESP</button>
-          <button onclick="sendBoardCommand('SAVE_ALL')">Save All in ESP</button>
-          <button onclick="loadBoardProfile()">Reload Selected Board</button>
+          <button onclick="saveBoardProfile()">ذخیرهٔ پروفایل در داشبورد</button>
+          <button onclick="sendBoardConfiguration()">ارسال پیکربندی به ESP</button>
+          <button onclick="receiveBoardConfiguration()">خواندن پیکربندی از ESP</button>
+          <button onclick="sendBoardCommand('SAVE_ALL')">ذخیرهٔ همه در ESP</button>
+          <button onclick="loadBoardProfile()">بازخوانی برد انتخاب‌شده</button>
         </div>
       </div>
 
@@ -426,6 +450,18 @@
       const eventsTable = document.getElementById('eventsTable');
       const commandLog = document.getElementById('commandLog');
       const messageLog = document.getElementById('messageLog');
+
+      // Persian display helpers
+      function faDigits(value) {
+        return String(value ?? '')
+          .replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])
+          .replace(/([۰-۹])\.([۰-۹])/g, '$1٫$2');
+      }
+      const statusFa = { online: 'آنلاین', offline: 'آفلاین', pending: 'در انتظار', replied: 'پاسخ داده شد', timeout: 'بدون پاسخ' };
+      const eventTypeFa = { speed: 'سرعت', event: 'رویداد', power: 'تغذیه', 'traffic-report': 'گزارش ترافیک', status: 'وضعیت', identity: 'شناسه', battery: 'باتری', raw: 'خام' };
+      const messageKindFa = { in: 'ورودی', out: 'خروجی', err: 'خطا', sys: 'سیستم' };
+      const classFa = { motor: 'موتورسیکلت', car: 'سواری', pickup: 'وانت', van: 'ون', bus: 'اتوبوس', truck_s: 'کامیون کوچک', truck_2: 'کامیون ۲ محور', truck_3: 'کامیون ۳ محور', truck_4: 'کامیون ۴+ محور', 'truck_4+': 'کامیون ۴+ محور', truck: 'کامیون', Motor: 'موتورسیکلت', Car: 'سواری', Pickup: 'وانت', Van: 'ون', Bus: 'اتوبوس', TruckS: 'کامیون کوچک', Truck2: 'کامیون ۲ محور', Truck3: 'کامیون ۳ محور', Truck4: 'کامیون ۴+ محور', 'Truck4+': 'کامیون ۴+ محور', Unknown: 'نامشخص' };
+      const measurementFa = { dual: 'دوحلقه‌ای', single: 'تک‌حلقه‌ای', assumed: 'سرعت فرضی', default: 'پیش‌فرض' };
 
       function setLog(text) {
         commandLog.textContent = text + '\n' + commandLog.textContent;
@@ -446,11 +482,11 @@
           return `${message.topic} ${message.payload} ${message.clientId}`.toLowerCase().includes(search);
         });
         messageLog.innerHTML = lines.map((message) => {
-          const time = new Date(message.ts).toLocaleTimeString();
-          const label = message.kind === 'in' ? 'IN ' : message.kind === 'out' ? 'OUT' : message.kind.toUpperCase();
-          const source = message.clientId ? ` from ${message.clientId}` : '';
-          return `<div class="message-line ${escapeHtml(message.kind)}"><span class="message-meta">[${escapeHtml(time)}] [${label}] ${escapeHtml(message.topic)}${escapeHtml(source)}</span>\n${escapeHtml(message.payload)}</div>`;
-        }).join('') || '<div class="small">No matching messages</div>';
+          const time = new Date(message.ts).toLocaleTimeString('fa-IR');
+          const label = messageKindFa[message.kind] || String(message.kind || '').toUpperCase();
+          const source = message.clientId ? ` از ${message.clientId}` : '';
+          return `<div class="message-line ${escapeHtml(message.kind)}"><span class="message-meta">[${escapeHtml(time)}] [${escapeHtml(label)}] ${escapeHtml(message.topic)}${escapeHtml(source)}</span>\n${escapeHtml(message.payload)}</div>`;
+        }).join('') || '<div class="small">پیام منطبقی یافت نشد</div>';
         if (document.getElementById('messageAutoScroll').checked) messageLog.scrollTop = messageLog.scrollHeight;
       }
 
@@ -467,11 +503,11 @@
 
       function renderStats(stats) {
         const cards = [
-          { label: 'Boards', value: stats.totalBoards ?? 0 },
-          { label: 'Online', value: stats.onlineBoards ?? 0 },
-          { label: 'Vehicles', value: stats.totalVehicles ?? 0 },
-          { label: 'Avg Speed', value: `${(stats.avgSpeed ?? 0).toFixed(1)} km/h` },
-          { label: 'Violations', value: stats.violations ?? 0 }
+          { label: 'برد‌ها', value: faDigits(stats.totalBoards ?? 0) },
+          { label: 'آنلاین', value: faDigits(stats.onlineBoards ?? 0) },
+          { label: 'خودروها', value: faDigits(stats.totalVehicles ?? 0) },
+          { label: 'میانگین سرعت', value: `${faDigits((stats.avgSpeed ?? 0).toFixed(1))} کیلومتر بر ساعت` },
+          { label: 'تخلفات', value: faDigits(stats.violations ?? 0) }
         ];
         statsGrid.innerHTML = cards.map((c) => `
           <div class="card">
@@ -490,12 +526,12 @@
           const pending = (d.commandLog || []).filter((c) => c.status === 'pending').length;
           const isOffline = d.status === 'offline';
           item.innerHTML = `
-            <div class="row"><strong>${d.name || d.id}</strong><span class="pill ${d.status === 'online' ? '' : 'offline'}">${d.status || 'offline'}</span></div>
-            <div class="small">ID: ${d.id}</div>
-            <div class="small">Battery: ${d.battery ?? '—'} V</div>
-            <div class="small">Last reply: ${lastReply}</div>
-            <div class="small">Pending: ${pending}</div>
-            ${isOffline ? `<div class="small" style="margin-top:8px;"><button class="delete-btn" data-device-id="${d.id}" style="background:var(--danger); color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Delete Device</button></div>` : ''}
+            <div class="row"><strong>${escapeHtml(d.name || d.id)}</strong><span class="pill ${d.status === 'online' ? '' : 'offline'}">${d.status === 'online' ? 'آنلاین' : 'آفلاین'}</span></div>
+            <div class="small">شناسه: <span class="ltr">${escapeHtml(d.id)}</span></div>
+            <div class="small">باتری: ${d.battery != null ? faDigits(Number(d.battery).toFixed(2)) + ' ولت' : '—'}</div>
+            <div class="small">آخرین پاسخ: <span class="ltr">${escapeHtml(lastReply)}</span></div>
+            <div class="small">در انتظار: ${faDigits(pending)}</div>
+            ${isOffline ? `<div class="small" style="margin-top:8px;"><button class="delete-btn" data-device-id="${escapeHtml(d.id)}" style="background:var(--danger); color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.75rem;">حذف دستگاه</button></div>` : ''}
           `;
           // Handle click on device item (but not on delete button)
           item.addEventListener('click', (e) => {
@@ -509,7 +545,7 @@
           if (deleteBtn) {
             deleteBtn.addEventListener('click', (e) => {
               e.stopPropagation();
-              if (confirm(`Delete offline device "${d.name || d.id}" (ID: ${d.id})? This cannot be undone.`)) {
+              if (confirm(`دستگاه آفلاین «${d.name || d.id}» (شناسه: ${d.id}) حذف شود؟ این عمل قابل بازگشت نیست.`)) {
                 deleteDevice(d.id);
               }
             });
@@ -522,14 +558,14 @@
       async function deleteDevice(deviceId) {
         try {
           const res = await fetch(`/api/device/${encodeURIComponent(deviceId)}`, { method: 'DELETE' });
-          if (!res.ok) throw new Error('Failed to delete');
+          if (!res.ok) throw new Error('حذف ناموفق بود');
           // If deleted device was selected, clear selection
           if (state.selectedId === deviceId) {
             state.selectedId = null;
           }
           await refreshDevices();
         } catch (err) {
-          alert('Error deleting device: ' + err.message);
+          alert('خطا در حذف دستگاه: ' + err.message);
         }
       }
 
@@ -548,7 +584,7 @@
         const input = document.getElementById('deviceNameInput');
 
         if (!d) {
-          title.textContent = 'Board Overview';
+          title.textContent = 'نمای کلی برد';
           battery.textContent = '—'; solar.textContent = '—'; signal.textContent = '—'; lastSeen.textContent = '—';
           status.textContent = '—'; name.textContent = '—'; boardId.textContent = '—'; loopPairs.textContent = '—'; classField.textContent = '—';
           input.value = '';
@@ -557,12 +593,12 @@
           return;
         }
 
-        title.textContent = `${d.name || d.id} Overview`;
-        battery.textContent = d.battery != null ? `${Number(d.battery).toFixed(2)} V` : '—';
-        solar.textContent = d.solar != null ? `${Number(d.solar).toFixed(2)} V` : '—';
-        signal.textContent = d.signal != null ? `${d.signal}` : '—';
-        lastSeen.textContent = d.lastSeen ? new Date(d.lastSeen).toLocaleString() : '—';
-        status.textContent = d.status || 'offline';
+        title.textContent = `نمای کلی ${d.name || d.id}`;
+        battery.textContent = d.battery != null ? `${faDigits(Number(d.battery).toFixed(2))} ولت` : '—';
+        solar.textContent = d.solar != null ? `${faDigits(Number(d.solar).toFixed(2))} ولت` : '—';
+        signal.textContent = d.signal != null ? faDigits(d.signal) : '—';
+        lastSeen.textContent = d.lastSeen ? new Date(d.lastSeen).toLocaleString('fa-IR') : '—';
+        status.textContent = statusFa[d.status] || 'آفلاین';
         name.textContent = d.name || d.id;
         boardId.textContent = d.id || '—';
         input.value = d.name || d.id;
@@ -596,15 +632,15 @@
         document.getElementById('loopConfigRows').innerHTML = pairs.map((pair, index) => `
           <div class="pair-card">
             <div class="pair-badge">P${index + 1}</div>
-            <div class="pair-flow"><span class="pair-dot"></span>Sensor A <span>→</span> Sensor B <span class="pair-dot"></span></div>
+            <div class="pair-flow"><span class="pair-dot"></span>سنسور A <span>←</span> سنسور B <span class="pair-dot"></span></div>
             <div class="config-grid" style="grid-template-columns:1fr 1fr;">
-              <div class="field"><label>Sensor A</label><select id="cfgPair${index}ASensor"><option value="0">Sensor 1</option><option value="1">Sensor 2</option></select></div>
-              <div class="field"><label>Channel A</label><select id="cfgPair${index}AChannel"><option>0</option><option>1</option><option>2</option><option>3</option></select></div>
-              <div class="field"><label>Sensor B</label><select id="cfgPair${index}BSensor"><option value="0">Sensor 1</option><option value="1">Sensor 2</option></select></div>
-              <div class="field"><label>Channel B</label><select id="cfgPair${index}BChannel"><option>0</option><option>1</option><option>2</option><option>3</option></select></div>
+              <div class="field"><label>سنسور A</label><select id="cfgPair${index}ASensor"><option value="0">سنسور ۱</option><option value="1">سنسور ۲</option></select></div>
+              <div class="field"><label>کانال A</label><select id="cfgPair${index}AChannel"><option value="0">۰</option><option value="1">۱</option><option value="2">۲</option><option value="3">۳</option></select></div>
+              <div class="field"><label>سنسور B</label><select id="cfgPair${index}BSensor"><option value="0">سنسور ۱</option><option value="1">سنسور ۲</option></select></div>
+              <div class="field"><label>کانال B</label><select id="cfgPair${index}BChannel"><option value="0">۰</option><option value="1">۱</option><option value="2">۲</option><option value="3">۳</option></select></div>
             </div>
-            <div class="field"><label>Distance (m)</label><input id="cfgPair${index}Distance" type="number" min="0.01" step="0.1"></div>
-            <div class="field"><label>Pair state</label><select id="cfgPair${index}Enabled"><option value="1">Enabled</option><option value="0">Disabled</option></select></div>
+            <div class="field"><label>فاصله (متر)</label><input id="cfgPair${index}Distance" type="number" min="0.01" step="0.1"></div>
+            <div class="field"><label>وضعیت جفت</label><select id="cfgPair${index}Enabled"><option value="1">فعال</option><option value="0">غیرفعال</option></select></div>
           </div>`).join('');
         pairs.forEach((pair, index) => {
           document.getElementById(`cfgPair${index}Enabled`).value = pair.enabled ? '1' : '0';
@@ -616,10 +652,10 @@
         });
         document.getElementById('sensorLcRows').innerHTML = Array.from({ length: 8 }, (_, i) => {
           const sensor = Math.floor(i / 4), channel = i % 4, lc = (p.sensorLC || [])[i] || {};
-          return `<div class="pair-card"><strong>S${sensor + 1} C${channel}</strong>
-            <div class="field"><label>Inductance L</label><input id="cfgLc${i}L" type="number" step="0.001" value="${configValue(lc.l, '')}"></div>
-            <div class="field"><label>Capacitance C</label><input id="cfgLc${i}C" type="number" step="0.001" value="${configValue(lc.c, '')}"></div>
-            <div class="small">Conversion: ${configValue(lc.conversion_time, '—')} · Current: ${configValue(lc.driver_current, '—')}</div></div>`;
+          return `<div class="pair-card"><strong>سنسور ${faDigits(sensor + 1)} / کانال ${faDigits(channel)}</strong>
+            <div class="field"><label>اندوکتانس L</label><input id="cfgLc${i}L" type="number" step="0.001" value="${configValue(lc.l, '')}"></div>
+            <div class="field"><label>ظرفیت خازنی C</label><input id="cfgLc${i}C" type="number" step="0.001" value="${configValue(lc.c, '')}"></div>
+            <div class="small">زمان تبدیل: ${faDigits(configValue(lc.conversion_time, '—'))} · جریان درایور: ${faDigits(configValue(lc.driver_current, '—'))}</div></div>`;
         }).join('');
         const fields = {
           cfgMinEvent: p.detector.min_event_ms, cfgMaxEvent: p.detector.max_event_ms, cfgEnterThresh: p.detector.enter_thresh,
@@ -671,13 +707,13 @@
         if (!state.selectedId) return;
         const profile = readConfigForm();
         fetch(`/api/device/${encodeURIComponent(state.selectedId)}/profile`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) })
-          .then((r) => r.json()).then((result) => setLog(`Profile saved: ${JSON.stringify(result)}`));
+          .then((r) => r.json()).then((result) => setLog(`پروفایل ذخیره شد: ${JSON.stringify(result)}`));
       }
 
       function sendBoardCommand(command) {
         if (!state.selectedId) return;
         fetch(`/api/device/${encodeURIComponent(state.selectedId)}/command`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command }) })
-          .then((r) => r.json()).then((result) => setLog(`Sent: ${command}\n${JSON.stringify(result)}`));
+          .then((r) => r.json()).then((result) => setLog(`ارسال شد: ${command}\n${JSON.stringify(result)}`));
       }
 
       function sendBoardConfiguration() {
@@ -704,25 +740,26 @@
 
       function receiveBoardConfiguration() {
         ['GET_CONFIG', 'GET_SPEED_CONFIG', 'GET_SENSOR_LC', 'GET_TRAFFIC_RULES', 'GET_REPORT_CFG', 'GET_MQTT_CFG', 'GET_DEFAULT_KMH'].forEach(sendBoardCommand);
-        setLog('Configuration requests sent. The form updates as replies arrive.');
+        setLog('درخواست‌های پیکربندی ارسال شد؛ فرم با رسیدن پاسخ‌ها به‌روز می‌شود.');
       }
 
       function loadBoardProfile() { refreshDevices(); }
 
       function renderCommandReplyTable(log) {
         const rows = (log || []).slice().reverse().slice(0, 25).map((c) => {
-          const time = new Date(c.ts).toLocaleTimeString();
+          const time = new Date(c.ts).toLocaleTimeString('fa-IR');
           const reply = c.replyBody ? c.replyBody.replace(/^RSP\|[^|]+\|/, '').slice(0, 120) : '—';
-          const statusColor = c.status === 'replied' ? 'var(--success)' : c.status === 'timeout' ? 'var(--danger)' : 'var(--warning)';
-          return `<tr><td>${time}</td><td>${c.cmdId || '—'}</td><td>${c.command || ''}</td><td style="color:${statusColor}">${c.status || 'pending'}</td><td>${reply}</td></tr>`;
+          const statusKey = c.status || 'pending';
+          const statusColor = statusKey === 'replied' ? 'var(--success)' : statusKey === 'timeout' ? 'var(--danger)' : 'var(--warning)';
+          return `<tr><td>${time}</td><td>${faDigits(c.cmdId || '—')}</td><td><span class="ltr">${escapeHtml(c.command || '')}</span></td><td style="color:${statusColor}">${statusFa[statusKey] || escapeHtml(statusKey)}</td><td><span class="ltr">${escapeHtml(reply)}</span></td></tr>`;
         }).join('');
         const tbody = document.getElementById('commandReplyTable');
-        tbody.innerHTML = rows || '<tr><td colspan="5">No commands sent yet</td></tr>';
+        tbody.innerHTML = rows || '<tr><td colspan="5">هنوز فرمانی ارسال نشده است</td></tr>';
       }
 
       function renderEvents(events) {
         const rows = (events || []).slice().reverse().slice(0, 20).map((e) => {
-          const time = new Date(e.ts || Date.now()).toLocaleTimeString();
+          const time = new Date(e.ts || Date.now()).toLocaleTimeString('fa-IR');
           const type = e.type || 'raw';
           const device = e.deviceId || '—';
           let details;
@@ -733,15 +770,16 @@
             const delay = Number(e.delay_ms ?? e.delay ?? 0).toFixed(1);
             const loops = [e.loopA || e.a, e.loopB || e.b].filter(Boolean).join(' → ');
             const mtype = e.measurementType || e.type_label || '';
-            details = `${speed} km/h · ${len} m · dist ${dist} m · delay ${delay} ms${loops ? ` · loops ${loops}` : ''}${mtype ? ` · ${mtype}` : ''}`;
+            details = `${faDigits(speed)} کیلومتر بر ساعت · طول ${faDigits(len)} متر · فاصله ${faDigits(dist)} متر · تأخیر ${faDigits(delay)} میلی‌ثانیه${loops ? ` · حلقه‌ها <span class="ltr">${escapeHtml(loops)}</span>` : ''}${mtype ? ` · ${escapeHtml(measurementFa[mtype] || mtype)}` : ''}`;
           } else if (type === 'event') {
-            details = `${e.class || e.vehicle_class || ''} score=${e.score ?? e.anomaly_score ?? '—'} peak=${e.peak ?? e.peak_dev ?? '—'} len=${e.len ?? e.estimated_length_m ?? '—'} m`;
+            const cls = e.class || e.vehicle_class || '';
+            details = `طبقه: ${escapeHtml(classFa[cls] || cls || '—')} · امتیاز ${faDigits(e.score ?? e.anomaly_score ?? '—')} · پیک ${faDigits(e.peak ?? e.peak_dev ?? '—')} · طول ${faDigits(e.len ?? e.estimated_length_m ?? e.est_len ?? '—')} متر`;
           } else {
-            details = JSON.stringify(e).slice(0, 140);
+            details = `<span class="ltr">${escapeHtml(JSON.stringify(e).slice(0, 140))}</span>`;
           }
-          return `<tr><td>${time}</td><td>${type}</td><td>${device}</td><td>${details}</td></tr>`;
+          return `<tr><td>${time}</td><td>${escapeHtml(eventTypeFa[type] || type)}</td><td><span class="ltr">${escapeHtml(device)}</span></td><td>${details}</td></tr>`;
         }).join('');
-        eventsTable.innerHTML = rows || '<tr><td colspan="4">No recent events</td></tr>';
+        eventsTable.innerHTML = rows || '<tr><td colspan="4">رویداد اخیری ثبت نشده است</td></tr>';
       }
 
       function applyState(payload) {
@@ -777,7 +815,7 @@
         const ws = new WebSocket(`${wsProtocol}//${location.host}/ws`);
         state.ws = ws;
         ws.onopen = () => {
-          document.getElementById('statusText').textContent = 'Connected';
+          document.getElementById('statusText').textContent = 'متصل';
         };
         ws.onmessage = (ev) => {
           const payload = JSON.parse(ev.data);
@@ -785,7 +823,7 @@
           if (payload.type === 'message') addMessage(payload.message);
         };
         ws.onclose = () => {
-          document.getElementById('statusText').textContent = 'Reconnecting…';
+          document.getElementById('statusText').textContent = 'در حال اتصال مجدد…';
           setTimeout(connectWS, 2000);
         };
       }
@@ -831,8 +869,8 @@
       document.querySelectorAll('.menu button').forEach((button) => button.addEventListener('click', () => selectSection(button.dataset.section)));
       document.getElementById('commandBroadcast').addEventListener('change', (event) => {
         document.getElementById('commandTargetHint').textContent = event.target.checked
-          ? 'Targets: selected board + all boards'
-          : 'Target: selected board only';
+          ? 'مقصد: برد انتخاب‌شده + همهٔ برد‌ها'
+          : 'مقصد: فقط برد انتخاب‌شده';
       });
       let firmwareFiles = [];
       let firmwareMd5Map = {};
@@ -843,38 +881,38 @@
           renderFirmwareList();
           updateOTASelect();
         }).catch((err) => {
-          document.getElementById('firmwareList').textContent = 'Error: ' + err.message;
+          document.getElementById('firmwareList').textContent = 'خطا: ' + err.message;
         });
       }
       function renderFirmwareList() {
         const c = document.getElementById('firmwareList');
-        if (!firmwareFiles.length) { c.innerHTML = '<div class="small">No firmware files uploaded yet.</div>'; return; }
-        c.innerHTML = firmwareFiles.map((f) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span>' + f.name + ' <span class="small">(' + (f.size / 1024).toFixed(1) + ' KB)</span></span><button onclick="deleteFirmware(\'' + f.name + '\')" style="background:var(--danger);padding:4px 8px;font-size:12px;">Delete</button></div>').join('');
+        if (!firmwareFiles.length) { c.innerHTML = '<div class="small">هنوز فایل میان‌افزاری بارگذاری نشده است.</div>'; return; }
+        c.innerHTML = firmwareFiles.map((f) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);"><span class="ltr">' + escapeHtml(f.name) + ' <span class="small">(' + faDigits((f.size / 1024).toFixed(1)) + ' کیلوبایت)</span></span><button onclick="deleteFirmware(\'' + escapeHtml(f.name) + '\')" style="background:var(--danger);padding:4px 8px;font-size:12px;">حذف</button></div>').join('');
       }
       function updateOTASelect() {
         const s = document.getElementById('otaFirmwareSelect');
-        s.innerHTML = '<option value="">-- Select a firmware file --</option>' + firmwareFiles.map((f) => '<option value="' + f.name + '">' + f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)</option>').join('');
+        s.innerHTML = '<option value="">— انتخاب فایل میان‌افزار —</option>' + firmwareFiles.map((f) => '<option value="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + ' (' + faDigits((f.size / 1024).toFixed(1)) + ' کیلوبایت)</option>').join('');
       }
       function uploadFirmware() {
         const inp = document.getElementById('firmwareFileInput');
         const st = document.getElementById('firmwareUploadStatus');
-        if (!inp.files.length) { st.textContent = 'Please select a .bin file first.'; st.style.color = 'var(--danger)'; return; }
+        if (!inp.files.length) { st.textContent = 'لطفاً ابتدا یک فایل .bin انتخاب کنید.'; st.style.color = 'var(--danger)'; return; }
         const file = inp.files[0];
-        if (!file.name.endsWith('.bin')) { st.textContent = 'Only .bin files are allowed.'; st.style.color = 'var(--danger)'; return; }
+        if (!file.name.endsWith('.bin')) { st.textContent = 'فقط فایل‌های .bin مجاز هستند.'; st.style.color = 'var(--danger)'; return; }
         const fd = new FormData(); fd.append('firmware', file);
-        st.textContent = 'Uploading...'; st.style.color = 'var(--muted)';
+        st.textContent = 'در حال بارگذاری…'; st.style.color = 'var(--muted)';
         fetch('/api/firmware/upload', { method: 'POST', body: fd }).then((r) => r.json().then((d) => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
-          if (!ok) throw new Error(data.error || 'Upload failed');
-          st.textContent = 'Uploaded: ' + data.filename + ' (' + (data.size / 1024).toFixed(1) + ' KB) MD5: ' + data.md5; st.style.color = 'var(--success)';
+          if (!ok) throw new Error(data.error || 'بارگذاری ناموفق بود');
+          st.textContent = 'بارگذاری شد: ' + data.filename + ' (' + faDigits((data.size / 1024).toFixed(1)) + ' کیلوبایت) — MD5: ' + data.md5; st.style.color = 'var(--success)';
           firmwareMd5Map[data.filename] = data.md5;
           refreshFirmwareList();
           setTimeout(() => { const sel = document.getElementById('otaFirmwareSelect'); sel.value = data.filename; otaSelectChanged(); }, 400);
           inp.value = '';
-        }).catch((err) => { st.textContent = 'Upload error: ' + err.message; st.style.color = 'var(--danger)'; });
+        }).catch((err) => { st.textContent = 'خطای بارگذاری: ' + err.message; st.style.color = 'var(--danger)'; });
       }
       function deleteFirmware(filename) {
-        if (!confirm('Delete firmware file: ' + filename + '?')) return;
-        fetch('/api/firmware/' + encodeURIComponent(filename), { method: 'DELETE' }).then((r) => r.json()).then(() => refreshFirmwareList()).catch((err) => alert('Delete failed: ' + err.message));
+        if (!confirm('فایل میان‌افزار «' + filename + '» حذف شود؟')) return;
+        fetch('/api/firmware/' + encodeURIComponent(filename), { method: 'DELETE' }).then((r) => r.json()).then(() => refreshFirmwareList()).catch((err) => alert('حذف ناموفق: ' + err.message));
       }
       function clearOTAForm() {
         document.getElementById('otaFirmwareSelect').value = '';
@@ -891,17 +929,17 @@
       }
       function triggerOTA() {
         const deviceId = state.selectedId;
-        if (!deviceId) { alert('Please select a device first.'); return; }
+        if (!deviceId) { alert('لطفاً ابتدا یک دستگاه را انتخاب کنید.'); return; }
         const firmwareUrl = document.getElementById('otaUrlInput').value.trim();
         const md5Hash = document.getElementById('otaMd5Input').value.trim();
-        if (!firmwareUrl) { alert('Please select a firmware file.'); return; }
+        if (!firmwareUrl) { alert('لطفاً یک فایل میان‌افزار انتخاب کنید.'); return; }
         const statusEl = document.getElementById('otaStatus');
-        statusEl.textContent = 'Sending OTA command to board ' + deviceId + '...\nURL: ' + firmwareUrl + '\nMD5: ' + (md5Hash || '(none)') + '\n';
+        statusEl.textContent = 'در حال ارسال فرمان OTA به برد ' + deviceId + '…\nآدرس: ' + firmwareUrl + '\nMD5: ' + (md5Hash || '(بدون هش)') + '\n';
         fetch('/api/device/' + encodeURIComponent(deviceId) + '/ota', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firmwareUrl, md5Hash }) }).then((r) => r.json().then((d) => ({ ok: r.ok, data: d }))).then(({ ok, data }) => {
-          if (!ok) throw new Error(data.error || 'OTA trigger failed');
-          statusEl.textContent += '\nOTA command sent! CmdId: ' + data.cmdId + '\nCommand: ' + data.command + '\n\nWaiting for board responses (OTA_ACCEPTED, OTA_PROGRESS, OTA_SUCCESS/OTA_ERROR)...\nCheck Console & Activity for live updates.';
+          if (!ok) throw new Error(data.error || 'ارسال فرمان OTA ناموفق بود');
+          statusEl.textContent += '\nفرمان OTA ارسال شد! شناسهٔ فرمان: ' + faDigits(data.cmdId) + '\nفرمان: ' + data.command + '\n\nدر انتظار پاسخ برد (OTA_ACCEPTED، OTA_PROGRESS، OTA_SUCCESS/OTA_ERROR)…\nبرای مشاهدهٔ به‌روزرسانی‌های زنده به بخش «کنسول و فعالیت» مراجعه کنید.';
           statusEl.style.color = 'var(--success)';
-        }).catch((err) => { statusEl.textContent += '\nError: ' + err.message; statusEl.style.color = 'var(--danger)'; });
+        }).catch((err) => { statusEl.textContent += '\nخطا: ' + err.message; statusEl.style.color = 'var(--danger)'; });
       }
       document.getElementById('otaFirmwareSelect')?.addEventListener('change', otaSelectChanged);
       refreshFirmwareList();
